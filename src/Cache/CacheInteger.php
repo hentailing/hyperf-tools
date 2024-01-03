@@ -9,8 +9,14 @@ use Madoka\Cache\Integer\IntegerInterface;
 /**
  * Class CacheInteger
  * @package Madoka\Cache
+ * @method int inc(string $key, int $step = 1, int $ttl = null)
+ * @method int dec(string $key, int $step = 1, int $ttl = null)
+ * @method int get(string $key, callable $callable)
+ * @method bool set(string $key, int $value, int $ttl = null)
+ * @method bool delete(string $key)
+ * @method bool has(string $key)
  */
-class CacheInteger implements IntegerInterface
+class CacheInteger
 {
     use NamespaceTrait;
 
@@ -19,59 +25,35 @@ class CacheInteger implements IntegerInterface
      */
     protected $driver;
 
-    /**
-     * @inheritDoc
-     */
-    public function inc(string $key, int $step = 1)
+    public function __call($name, $arguments)
     {
-        return $this->driver->inc($this->name($key), $step);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function dec(string $key, int $step = 1)
-    {
-        return $this->driver->dec($this->name($key), $step);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function get($key, callable $callable)
-    {
-        return $this->driver->get($this->name($key), $callable);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function set($key, $value, $ttl = null)
-    {
-        return $this->driver->set($this->name($key), $value, $ttl);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function delete($key)
-    {
-        return $this->driver->delete($this->name($key));
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function has($key)
-    {
-        return $this->driver->has($this->name($key));
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function expire($key, $ttl)
-    {
-        $this->driver->expire($this->name($key), $ttl);
+        $result = 0;
+        switch ($name){
+            case 'inc':
+                $arguments[0] = $this->name($arguments[0]);
+                $result = $this->driver->inc(...$arguments);
+                break;
+            case 'dec':
+                $arguments[0] = $this->name($arguments[0]);
+                $result = $this->driver->dec(...$arguments);
+                break;
+            case 'get':
+                $arguments[0] = $this->name($arguments[0]);
+                $result = $this->driver->get(...$arguments);
+                break;
+            case 'set':
+                $arguments[0] = $this->name($arguments[0]);
+                $result = $this->driver->set(...$arguments);
+                break;
+            case 'delete':
+                $arguments[0] = $this->name($arguments[0]);
+                $result = $this->driver->delete(...$arguments);
+                break;
+            case 'has':
+                $arguments[0] = $this->name($arguments[0]);
+                $result = $this->driver->has(...$arguments);
+                break;
+        }
+        return $result;
     }
 }

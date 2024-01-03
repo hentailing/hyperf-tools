@@ -7,14 +7,25 @@ namespace Madoka\Cache;
 use Madoka\Cache\Driver\DriverInterface;
 use Hyperf\Cache\Driver\DriverInterface as HyperfDriverInterface;
 use Generator;
-use Psr\SimpleCache\CacheInterface;
 
 /**
  * 缓存执行器
  * Class CacheActuator
  * @package Madoka\Cache
+ * @method mixed get(string $key, mixed $default = null) 获取缓存
+ * @method bool set(string $key, mixed $value, int $ttl = null) 设置缓存
+ * @method bool delete(string $key) 删除缓存
+ * @method bool has(string $key) 缓存是否存在
+ * @method bool clear() 清空缓存
+ * @method Generator getKeys() 获取当前所有缓存key迭代器
+ * @method Generator getValues() 获取当前所有缓存内容迭代器
+ * @method int count() 获取当前所有缓存的计数
+ * @method array getMultiple(array $keys, mixed $default = null) 批量获取缓存
+ * @method bool setMultiple(array $values, int $ttl = null) 批量设置缓存
+ * @method bool deletedMultiple(array $keys) 批量删除缓存
+ * @method array fetch(string $key, mixed $default) 获取缓存存在状态和数据
  */
-class CacheActuator implements CacheInterface
+class CacheActuator
 {
     use NamespaceTrait;
 
@@ -27,11 +38,60 @@ class CacheActuator implements CacheInterface
     {
         $result = null;
         switch ($name){
+            case 'get':
+                $arguments[0] = $this->name($arguments[0]);
+                $result = $this->driver->get(...$arguments);
+                break;
+            case 'set':
+                $arguments[0] = $this->name($arguments[0]);
+                $result = $this->driver->set(...$arguments);
+                break;
+            case 'delete':
+                $arguments[0] = $this->name($arguments[0]);
+                $result = $this->driver->delete(...$arguments);
+                break;
+            case 'has':
+                $arguments[0] = $this->name($arguments[0]);
+                $result = $this->driver->has(...$arguments);
+                break;
+            case 'clear':
+                $result = $this->driver->clearPrefix($this->join());
+                break;
+            case 'count':
+                $result = $this->driver->countPrefix($this->join());
+                break;
             case 'getKeys':
                 $result = $this->driver->getPrefixKeys($this->join());
                 break;
             case 'getValues':
                 $result = $this->driver->getMultiplePrefix($this->join());
+                break;
+            case 'getMultiple':
+                $keys = $arguments[0];
+                $arguments[0] = array_map(function ($key) {
+                    return $this->name($key);
+                }, $keys);
+                $result = [];
+                $values = $this->driver->getMultiple(...$arguments);
+                $index = 0;
+                foreach ($values as $value){
+                    $result[$keys[$index]] = $value;
+                    $index++;
+                }
+                break;
+            case 'setMultiple':
+                $cacheKeys = [];
+                foreach ($arguments[0] as $key => $value) {
+                    $cacheKeys[$this->name($key)] = $value;
+                }
+                $arguments[0] = $cacheKeys;
+                $result = $this->driver->setMultiple(...$arguments);
+                break;
+            case 'deleteMultiple':
+                $arguments[0] = array_map(function ($key) {
+                    return $this->name($key);
+                }, $arguments[0]);
+                $result = $this->driver->deleteMultiple(...$arguments);
                 break;
             case 'fetch':
                 $arguments[0] = $this->name($arguments[0]);
@@ -39,124 +99,5 @@ class CacheActuator implements CacheInterface
                 break;
         }
         return $result;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function get($key, $default = null)
-    {
-        return $this->driver->get($this->name($key), $default);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function set($key, $value, $ttl = null)
-    {
-        return $this->driver->set($this->name($key), $value, $ttl);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function delete($key)
-    {
-        return $this->driver->delete($this->name($key));
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function clear()
-    {
-        return $this->driver->clearPrefix($this->join());
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getMultiple($keys, $default = null)
-    {
-        $cacheKeys = [];
-        foreach ($keys as $key){
-            $cacheKeys[] = $this->name($key);
-        }
-        $result = [];
-        $values = $this->driver->getMultiple($cacheKeys, $default);
-        foreach ($cacheKeys as $index => $cacheKey){
-            $result[$keys[$index]] = $values[$cacheKey];
-        }
-        return $result;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function setMultiple($values, $ttl = null)
-    {
-        $newValues = [];
-        foreach ($values as $key => $value){
-            $newValues[$this->name($key)] = $value;
-        }
-        return $this->driver->setMultiple($newValues, $ttl);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function deleteMultiple($keys)
-    {
-        $cacheKeys = [];
-        foreach ($keys as $key){
-            $cacheKeys[] = $this->name($key);
-        }
-        return $this->deleteMultiple($cacheKeys);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function has($key)
-    {
-        return $this->driver->has($this->name($key));
-    }
-
-    /**
-     * 获取当前所有缓存的计数
-     * @return int
-     */
-    public function count()
-    {
-        return $this->driver->countPrefix($this->join());
-    }
-
-    /**
-     * 获取当前所有缓存key迭代器
-     * @return Generator
-     */
-    public function getKeys()
-    {
-        yield from $this->driver->getPrefixKeys($this->join());
-    }
-
-    /**
-     * 获取当前所有缓存内容迭代器
-     * @return Generator
-     */
-    public function getValues()
-    {
-        yield from $this->driver->getPrefixKeys($this->join());
-    }
-
-    /**
-     * 获取缓存存在状态和数据
-     * @param string $key
-     * @param mixed $default
-     * @return array
-     */
-    public function fetch(string $key, $default = null)
-    {
-        return $this->driver->fetch($this->name($key), $default);
     }
 }
