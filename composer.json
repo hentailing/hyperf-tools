@@ -1,0 +1,23 @@
+{
+    "name": "madoka/hyperf-tools",
+    "description": "An independent component that use to myself.",
+    "type": "library",
+    "license": "MIT",
+    "require": {
+        "hyperf/contract": "^2.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "Madoka\\": "src/"
+        }
+    },
+    "suggest": {
+        "ext-openssl": "Required to use Cipher.",
+        "ext-apcu": "Required to use Apcu Cache Driver."
+    },
+    "extra": {
+        "hyperf": {
+            "config": "Madoka\\ConfigProvider"
+        }
+    }
+}
