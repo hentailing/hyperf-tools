@@ -7,14 +7,13 @@ namespace Madoka\Cache;
 use Madoka\Cache\Driver\DriverInterface;
 use Hyperf\Cache\Driver\DriverInterface as HyperfDriverInterface;
 use Generator;
-use Psr\SimpleCache\CacheInterface;
 
 /**
  * 缓存执行器
  * Class CacheActuator
  * @package Madoka\Cache
  */
-class CacheActuator implements CacheInterface
+class CacheActuator implements HyperfDriverInterface
 {
     use NamespaceTrait;
 
@@ -22,24 +21,6 @@ class CacheActuator implements CacheInterface
      * @var HyperfDriverInterface|DriverInterface
      */
     protected $driver;
-
-    public function __call($name, $arguments)
-    {
-        $result = null;
-        switch ($name){
-            case 'getKeys':
-                $result = $this->driver->getPrefixKeys($this->join());
-                break;
-            case 'getValues':
-                $result = $this->driver->getMultiplePrefix($this->join());
-                break;
-            case 'fetch':
-                $arguments[0] = $this->name($arguments[0]);
-                $result = $this->driver->fetch(...$arguments);
-                break;
-        }
-        return $result;
-    }
 
     /**
      * @inheritDoc
@@ -150,13 +131,18 @@ class CacheActuator implements CacheInterface
     }
 
     /**
-     * 获取缓存存在状态和数据
-     * @param string $key
-     * @param mixed $default
-     * @return array
+     * @inheritDoc
      */
-    public function fetch(string $key, $default = null)
+    public function fetch(string $key, $default = null): array
     {
         return $this->driver->fetch($this->name($key), $default);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function clearPrefix(string $prefix): bool
+    {
+        return $this->driver->clearPrefix($this->name($prefix));
     }
 }
