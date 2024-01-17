@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Madoka\Cache\Integer;
 
+use Generator;
 use Hyperf\Cache\Exception\CacheException;
 use Hyperf\Memory\TableManager;
+use Madoka\Cache\PrefixCacheInterface;
 use Psr\Container\ContainerInterface;
 use Swoole\Table;
 
@@ -16,7 +18,7 @@ class SwooleTableDriver extends Driver
     /**
      * @var Table
      */
-    protected $table;
+    protected Table $table;
 
     public function __construct(ContainerInterface $container, array $config)
     {
@@ -30,56 +32,77 @@ class SwooleTableDriver extends Driver
     /**
      * @inheritDoc
      */
-    public function inc(string $key, int $step = 1)
+    public function inc(string $key, int $step = 1): int
     {
-        return $this->table->incr($key, static::COLUMN_NAME, $step);
+        return $this->table->incr($this->getCacheKey($key), static::COLUMN_NAME, $step);
     }
 
     /**
      * @inheritDoc
      */
-    public function dec(string $key, int $step = 1)
+    public function dec(string $key, int $step = 1): int
     {
-        return $this->table->decr($key, static::COLUMN_NAME, $step);
+        return $this->table->decr($this->getCacheKey($key), static::COLUMN_NAME, $step);
     }
 
     /**
      * @inheritDoc
      */
-    public function get($key, $default = 0)
+    public function get(string $key, callable $callable): int
     {
-        return $this->table->exist($key) ? $this->table->get($key, static::COLUMN_NAME) : (int)$default;
+        $cacheKey = $this->getCacheKey($key);
+        if ($this->table->exist($cacheKey)) {
+            return $this->table->get($cacheKey, static::COLUMN_NAME);
+        }else {
+            $int = (int)$callable();
+            $this->set($key, $int);
+            return $int;
+        }
     }
 
     /**
      * @inheritDoc
      */
-    public function set($key, $value, $ttl = null)
+    public function set(string $key, int $value, int $ttl = null): bool
     {
-        return (bool)$this->table->set($key, [static::COLUMN_NAME => $value]);
+        return $this->table->set($this->getCacheKey($key), [static::COLUMN_NAME => $value]);
     }
 
     /**
      * @inheritDoc
      */
-    public function delete($key)
+    public function delete(string $key): bool
     {
-        return (bool) $this->table->del($key);
+        return $this->table->del($this->getCacheKey($key));
     }
 
     /**
      * @inheritDoc
      */
-    public function has($key)
+    public function has(string $key): bool
     {
-        return (bool)$this->table->exist($key);
+        return $this->table->exist($this->getCacheKey($key));
     }
 
     /**
      * @inheritDoc
      */
-    public function expire($key, $ttl)
+    public function expire($key, $ttl): void
     {
         // 不需要操作，swoole table不支持过期时间设置
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getMultiplePrefix(string $prefix): Generator
+    {
+        $cacheKey = $this->getCacheKey($prefix) . PrefixCacheInterface::SEPARATOR;
+        $prefixLength = strlen($cacheKey);
+        foreach ($this->table as $key => $item) {
+            if (str_contains($key, $cacheKey)) {
+                yield substr($key, $prefixLength) => $item[static::COLUMN_NAME];
+            }
+        }
     }
 }

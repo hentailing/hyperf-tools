@@ -5,27 +5,27 @@ declare(strict_types=1);
 namespace Madoka\Cache;
 
 use Madoka\Cache\Driver\DriverInterface;
-use Hyperf\Cache\Driver\DriverInterface as HyperfDriverInterface;
 use Generator;
+use Psr\SimpleCache\CacheInterface;
 
 /**
  * 缓存执行器
  * Class CacheActuator
  * @package Madoka\Cache
  */
-class CacheActuator implements HyperfDriverInterface
+class CacheActuator implements CacheInterface
 {
     use NamespaceTrait;
 
     /**
-     * @var HyperfDriverInterface|DriverInterface
+     * @var DriverInterface
      */
-    protected $driver;
+    protected DriverInterface $driver;
 
     /**
      * @inheritDoc
      */
-    public function get($key, $default = null)
+    public function get(string $key, mixed $default = null): mixed
     {
         return $this->driver->get($this->name($key), $default);
     }
@@ -33,7 +33,7 @@ class CacheActuator implements HyperfDriverInterface
     /**
      * @inheritDoc
      */
-    public function set($key, $value, $ttl = null)
+    public function set(string $key, mixed $value, null|int|\DateInterval $ttl = null): bool
     {
         return $this->driver->set($this->name($key), $value, $ttl);
     }
@@ -41,7 +41,7 @@ class CacheActuator implements HyperfDriverInterface
     /**
      * @inheritDoc
      */
-    public function delete($key)
+    public function delete(string $key): bool
     {
         return $this->driver->delete($this->name($key));
     }
@@ -49,7 +49,7 @@ class CacheActuator implements HyperfDriverInterface
     /**
      * @inheritDoc
      */
-    public function clear()
+    public function clear(): bool
     {
         return $this->driver->clearPrefix($this->join());
     }
@@ -57,7 +57,7 @@ class CacheActuator implements HyperfDriverInterface
     /**
      * @inheritDoc
      */
-    public function getMultiple($keys, $default = null)
+    public function getMultiple(iterable $keys, mixed $default = null): iterable
     {
         $cacheKeys = [];
         foreach ($keys as $key){
@@ -74,7 +74,7 @@ class CacheActuator implements HyperfDriverInterface
     /**
      * @inheritDoc
      */
-    public function setMultiple($values, $ttl = null)
+    public function setMultiple(iterable $values, null|int|\DateInterval $ttl = null): bool
     {
         $newValues = [];
         foreach ($values as $key => $value){
@@ -86,19 +86,19 @@ class CacheActuator implements HyperfDriverInterface
     /**
      * @inheritDoc
      */
-    public function deleteMultiple($keys)
+    public function deleteMultiple(iterable $keys): bool
     {
         $cacheKeys = [];
         foreach ($keys as $key){
             $cacheKeys[] = $this->name($key);
         }
-        return $this->deleteMultiple($cacheKeys);
+        return $this->driver->deleteMultiple($cacheKeys);
     }
 
     /**
      * @inheritDoc
      */
-    public function has($key)
+    public function has(string $key): bool
     {
         return $this->driver->has($this->name($key));
     }
@@ -107,7 +107,7 @@ class CacheActuator implements HyperfDriverInterface
      * 获取当前所有缓存的计数
      * @return int
      */
-    public function count()
+    public function count(): int
     {
         return $this->driver->countPrefix($this->join());
     }
@@ -116,7 +116,7 @@ class CacheActuator implements HyperfDriverInterface
      * 获取当前所有缓存key迭代器
      * @return Generator
      */
-    public function getKeys()
+    public function getKeys(): Generator
     {
         yield from $this->driver->getPrefixKeys($this->join());
     }
@@ -125,21 +125,21 @@ class CacheActuator implements HyperfDriverInterface
      * 获取当前所有缓存内容迭代器
      * @return Generator
      */
-    public function getValues()
+    public function getValues(): Generator
     {
         yield from $this->driver->getPrefixKeys($this->join());
     }
 
     /**
-     * @inheritDoc
+     * Return state of existence and data at the same time.
      */
-    public function fetch(string $key, $default = null): array
+    public function fetch(string $key, mixed $default = null): array
     {
         return $this->driver->fetch($this->name($key), $default);
     }
 
     /**
-     * @inheritDoc
+     * Clean up data of the same prefix.
      */
     public function clearPrefix(string $prefix): bool
     {

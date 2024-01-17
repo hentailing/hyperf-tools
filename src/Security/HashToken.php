@@ -9,38 +9,38 @@ class HashToken
     /**
      * @var string
      */
-    private $key;
+    private string $key;
 
     /**
      * @var string
      */
-    private $method = 'AES-256-CBC';
+    private string $method = 'AES-256-CBC';
 
     /**
      * @var string
      */
-    private $hashMethod = 'md5';
+    private string $hashMethod = 'md5';
 
     /**
      * @var int
      */
-    private $option = OPENSSL_RAW_DATA;
+    private int $option = OPENSSL_RAW_DATA;
 
     /**
      * @var int
      */
-    private $ivLength = 16;
+    private int $ivLength = 16;
 
     /**
      * @var int
      */
-    private $hashLength = 16;
+    private int $hashLength = 16;
 
     /**
      * @param string $key
      * @return static
      */
-    public function setKey(string $key)
+    public function setKey(string $key): self
     {
         $this->key = $key;
         return $this;
@@ -50,7 +50,7 @@ class HashToken
      * @param int $option
      * @return static
      */
-    public function setOption(int $option)
+    public function setOption(int $option): self
     {
         $this->option = $option;
         return $this;
@@ -59,7 +59,8 @@ class HashToken
     /**
      * 使用md5
      */
-    public function useMd5(){
+    public function useMd5(): void
+    {
         $this->hashMethod = 'md5';
         $this->hashLength = 16;
     }
@@ -67,7 +68,8 @@ class HashToken
     /**
      * 使用sha1
      */
-    public function useSha1(){
+    public function useSha1(): void
+    {
         $this->hashMethod = 'sha1';
         $this->hashLength = 20;
     }
@@ -75,7 +77,8 @@ class HashToken
     /**
      * 使用sha256
      */
-    public function useSha256(){
+    public function useSha256(): void
+    {
         $this->hashMethod = 'sha256';
         $this->hashLength = 32;
     }
@@ -85,7 +88,8 @@ class HashToken
      * @param IntegerPackInterface $integerPack
      * @return string
      */
-    public function generate($integerPack){
+    public function generate(IntegerPackInterface $integerPack): string
+    {
         $iv = random_bytes($this->ivLength);
 
         $data = $integerPack->getPack();
@@ -102,16 +106,13 @@ class HashToken
      * @param string $data
      * @return string
      */
-    public function validate($data){
+    public function validate(string $data): string
+    {
         $baseDecode = $this->legibleDecode($data);
-
-        if(!is_string($baseDecode)){
-            throw new \RuntimeException('字符串解码失败');
-        }
 
         $ivHashLength = $this->ivLength + $this->hashLength;
 
-        if(strlen($baseDecode) < $ivHashLength){
+        if (strlen($baseDecode) < $ivHashLength) {
             throw new \RuntimeException('字符串长度不正确');
         }
 
@@ -123,9 +124,9 @@ class HashToken
 
         $decodeHash = substr($ivHashString, -$this->hashLength);
 
-        if(hash_equals($decodeHash, hash($this->hashMethod, $decodeIv . $decodeEncrypt, true))){
+        if (hash_equals($decodeHash, hash($this->hashMethod, $decodeIv . $decodeEncrypt, true))) {
             return openssl_decrypt($decodeEncrypt, $this->method, $this->key, OPENSSL_RAW_DATA, $decodeIv);
-        }else{
+        } else {
             throw new \RuntimeException('数据验证验证失败');
         }
     }
@@ -134,7 +135,8 @@ class HashToken
      * @param string $data
      * @return string
      */
-    protected function legibleEncode($data){
+    protected function legibleEncode(string $data): string
+    {
         return base64_encode($data);
     }
 
@@ -142,7 +144,8 @@ class HashToken
      * @param string $data
      * @return string
      */
-    protected function legibleDecode($data){
+    protected function legibleDecode(string $data): string
+    {
         return base64_decode($data);
     }
 }

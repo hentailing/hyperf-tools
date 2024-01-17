@@ -6,32 +6,16 @@ namespace Madoka\Cache\Driver;
 
 use Hyperf\Cache\Driver\DriverInterface as HyperfDriverInterface;
 use Generator;
+use Madoka\Cache\PrefixCacheInterface;
 
-interface DriverInterface extends HyperfDriverInterface
+interface DriverInterface extends HyperfDriverInterface, PrefixCacheInterface
 {
-    /**
-     * 缓存分隔符
-     */
-    public const SEPARATOR = '.';
-
-    /**
-     * 匹配前缀时的分段长度
-     */
-    public const MATCH_CHUNK_SIZE = 2500;
-
     /**
      * 获取前缀Key
      * @param string $prefix
      * @return Generator
      */
     public function getPrefixKeys(string $prefix): Generator;
-
-    /**
-     * 获取前缀的每个元素
-     * @param string $prefix
-     * @return Generator
-     */
-    public function getMultiplePrefix(string $prefix): Generator;
 
     /**
      * 获取前缀的计数

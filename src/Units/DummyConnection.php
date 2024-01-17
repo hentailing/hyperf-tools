@@ -15,11 +15,11 @@ class DummyConnection extends Connection
 {
 
     /**
-     * @return $this
+     * @return static
      */
-    public function getActiveConnection()
+    public function getActiveConnection(): static
     {
-        return $this;
+        return new static($this->container, $this->pool);
     }
 
     /**

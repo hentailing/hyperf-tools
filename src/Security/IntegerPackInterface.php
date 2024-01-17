@@ -9,5 +9,5 @@ interface IntegerPackInterface
     /**
      * @return string
      */
-    public function getPack();
+    public function getPack(): string;
 }

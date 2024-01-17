@@ -22,14 +22,14 @@ abstract class RSACipher
     /**
      * @var int
      */
-    protected $padding = OPENSSL_PKCS1_PADDING;
+    protected int $padding = OPENSSL_PKCS1_PADDING;
 
     /**
      * @var array
      */
-    private $details;
+    private array $details;
 
-    public function __construct($rsaKeyFile)
+    public function __construct(string $rsaKeyFile)
     {
         if(!is_file($rsaKeyFile)){
             throw new EncryptException('没有配置密钥');
@@ -42,7 +42,8 @@ abstract class RSACipher
      * @param int $padding
      * @return static
      */
-    public function withPadding($padding){
+    public function withPadding(int $padding): self
+    {
         $this->padding = $padding;
         return $this;
     }
@@ -51,7 +52,8 @@ abstract class RSACipher
      * 获取密钥信息
      * @return array
      */
-    public function getKeyDetails(){
+    public function getKeyDetails(): array
+    {
         if(!isset($this->details)){
             $this->details = openssl_pkey_get_details($this->resource);
         }
@@ -83,10 +85,10 @@ abstract class RSACipher
     /**
      * 设置密钥
      * @param string $content 密钥内容
-     * @return resource
+     * @return \OpenSSLAsymmetricKey
      * @throws EncryptException
      */
-    abstract public function withKey(string $content);
+    abstract public function withKey(string $content): \OpenSSLAsymmetricKey;
 
     /**
      * 加密内容
@@ -94,7 +96,7 @@ abstract class RSACipher
      * @return string
      * @throws EncryptException
      */
-    abstract public function encrypt(string $string);
+    abstract public function encrypt(string $string): string;
 
     /**
      * 解密内容
@@ -102,5 +104,5 @@ abstract class RSACipher
      * @return string
      * @throws EncryptException
      */
-    abstract public function decrypt(string $string);
+    abstract public function decrypt(string $string): string;
 }

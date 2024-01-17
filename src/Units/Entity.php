@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Madoka\Units;
 
-use Hyperf\Utils\Contracts\Arrayable;
+use Hyperf\Contract\Arrayable;
 use ArrayAccess;
 use ArrayIterator;
 use IteratorAggregate;
@@ -21,33 +21,33 @@ class Entity implements IteratorAggregate, JsonSerializable, ArrayAccess, Arraya
     /**
      * @var array
      */
-    protected $data;
+    protected array $data;
 
     /**
      * Entity constructor.
      * @param array $data
      */
-    public function __construct($data = [])
+    public function __construct(array $data = [])
     {
         $this->data($data);
     }
 
-    public function __get($name)
+    public function __get($name): mixed
     {
-        return isset($this->data[$name]) ? $this->data[$name] : null;
+        return $this->data[$name] ?? null;
     }
 
-    public function __set($name, $value)
+    public function __set($name, $value): void
     {
         $this->data[$name] = $value;
     }
 
-    public function __isset($name)
+    public function __isset($name): bool
     {
         return array_key_exists($name, $this->data);
     }
 
-    public function __unset($name)
+    public function __unset($name): void
     {
         unset($this->data[$name]);
     }
@@ -55,15 +55,15 @@ class Entity implements IteratorAggregate, JsonSerializable, ArrayAccess, Arraya
     /**
      * @param array $data
      */
-    public function data($data)
+    public function data(array $data): void
     {
-        $this->data = (array)$data;
+        $this->data = $data;
     }
 
     /**
      * @inheritDoc
      */
-    public function getIterator()
+    public function getIterator(): ArrayIterator
     {
         return new ArrayIterator($this->data);
     }
@@ -71,7 +71,7 @@ class Entity implements IteratorAggregate, JsonSerializable, ArrayAccess, Arraya
     /**
      * @inheritDoc
      */
-    public function offsetExists($offset)
+    public function offsetExists(mixed $offset): bool
     {
         return $this->__isset($offset);
     }
@@ -79,7 +79,7 @@ class Entity implements IteratorAggregate, JsonSerializable, ArrayAccess, Arraya
     /**
      * @inheritDoc
      */
-    public function offsetGet($offset)
+    public function offsetGet(mixed $offset): mixed
     {
         return $this->__get($offset);
     }
@@ -87,7 +87,7 @@ class Entity implements IteratorAggregate, JsonSerializable, ArrayAccess, Arraya
     /**
      * @inheritDoc
      */
-    public function offsetSet($offset, $value)
+    public function offsetSet(mixed $offset, mixed $value): void
     {
         $this->__set($offset, $value);
     }
@@ -95,7 +95,7 @@ class Entity implements IteratorAggregate, JsonSerializable, ArrayAccess, Arraya
     /**
      * @inheritDoc
      */
-    public function offsetUnset($offset)
+    public function offsetUnset(mixed $offset): void
     {
         $this->__unset($offset);
     }
@@ -103,7 +103,7 @@ class Entity implements IteratorAggregate, JsonSerializable, ArrayAccess, Arraya
     /**
      * @inheritDoc
      */
-    public function jsonSerialize()
+    public function jsonSerialize(): stdClass|array
     {
         return empty($this->data) ? new stdClass() : $this->data;
     }
@@ -121,7 +121,8 @@ class Entity implements IteratorAggregate, JsonSerializable, ArrayAccess, Arraya
     /**
      * @return bool
      */
-    public function isEmpty(){
+    public function isEmpty(): bool
+    {
         return empty($this->data);
     }
 }

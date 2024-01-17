@@ -17,20 +17,20 @@ class BeforeStartCallback extends ServerStartCallback
     /**
      * @var ContainerInterface
      */
-    protected $container;
+    protected ContainerInterface $container;
 
     public function __construct(ContainerInterface $container)
     {
         $this->container = $container;
     }
 
-    public function beforeStart()
+    public function beforeStart(): void
     {
         $config = $this->container->get(ConfigInterface::class);
         $tableConfigs = $config->get('inahime.tables', []);
-        foreach ($tableConfigs as $key => $item){
-            if($item['enable'] && is_callable($item['callback'])){
-                $table = TableManager::initialize($key, $item['size'], isset($item['conflictProportion']) ? $item['conflictProportion'] : 0.2);
+        foreach ($tableConfigs as $key => $item) {
+            if ($item['enable'] && is_callable($item['callback'])) {
+                $table = TableManager::initialize($key, $item['size'], $item['conflictProportion'] ?? 0.2);
                 call_user_func($item['callback'], $table);
                 $table->create();
             }

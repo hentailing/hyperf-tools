@@ -16,10 +16,10 @@ class RSAPublic extends RSACipher
     /**
      * @inheritDoc
      */
-    public function withKey(string $content)
+    public function withKey(string $content): \OpenSSLAsymmetricKey
     {
         $resource = openssl_get_publickey($content);
-        if( ! is_resource($resource) ){
+        if (false === $resource) {
             throw new EncryptException('public_key加载失败 ' . openssl_error_string());
         }
         return $resource;
@@ -28,12 +28,12 @@ class RSAPublic extends RSACipher
     /**
      * @inheritDoc
      */
-    public function encrypt(string $string)
+    public function encrypt(string $string): string
     {
         $result = openssl_public_encrypt($string, $encrypted, $this->resource, $this->padding);
-        if( $result ){
+        if ($result) {
             return $encrypted;
-        }else{
+        } else {
             throw new EncryptException('加密失败: ' . openssl_error_string());
         }
     }
@@ -41,12 +41,12 @@ class RSAPublic extends RSACipher
     /**
      * @inheritDoc
      */
-    public function decrypt(string $string)
+    public function decrypt(string $string): string
     {
         $result = openssl_public_decrypt($string, $decrypted, $this->resource, $this->padding);
-        if( $result ){
+        if ($result) {
             return $decrypted;
-        }else{
+        } else {
             throw new EncryptException('解密失败: ' . openssl_error_string());
         }
     }

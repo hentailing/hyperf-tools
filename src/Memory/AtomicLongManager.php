@@ -14,14 +14,14 @@ class AtomicLongManager
      *
      * @var array
      */
-    private static $container = [];
+    private static array $container = [];
 
     /**
      * You should initialize a Atomic Long with the identifier before use it.
      * @param string $identifier
      * @param int $value
      */
-    public static function initialize(string $identifier, $value = 0): void
+    public static function initialize(string $identifier, int $value = 0): void
     {
         static::$container[$identifier] = new Long($value);
     }
@@ -35,7 +35,7 @@ class AtomicLongManager
      */
     public static function get(string $identifier): Long
     {
-        if (! isset(static::$container[$identifier])) {
+        if (!isset(static::$container[$identifier])) {
             throw new RuntimeException('The Atomic Long has not initialization yet.');
         }
 

@@ -4,12 +4,15 @@ declare(strict_types=1);
 
 namespace Madoka\Cache\Integer;
 
+use Generator;
+use Madoka\Cache\PrefixCacheInterface;
+
 class ApcuDriver extends Driver
 {
     /**
      * @inheritDoc
      */
-    public function inc(string $key, int $step = 1)
+    public function inc(string $key, int $step = 1): int
     {
         return apcu_inc($this->getCacheKey($key), $step, $success);
     }
@@ -17,7 +20,7 @@ class ApcuDriver extends Driver
     /**
      * @inheritDoc
      */
-    public function dec(string $key, int $step = 1)
+    public function dec(string $key, int $step = 1): int
     {
         return apcu_inc($this->getCacheKey($key), $step, $success);
     }
@@ -25,9 +28,9 @@ class ApcuDriver extends Driver
     /**
      * @inheritDoc
      */
-    public function get($key, callable $callable)
+    public function get(string $key, callable $callable): int
     {
-        return apcu_entry($this->getCacheKey($key), function () use ($callable){
+        return apcu_entry($this->getCacheKey($key), function () use ($callable) {
             return (int)call_user_func($callable);
         });
     }
@@ -35,7 +38,7 @@ class ApcuDriver extends Driver
     /**
      * @inheritDoc
      */
-    public function set($key, $value, $ttl = null)
+    public function set($key, $value, $ttl = null): bool
     {
         return (bool)apcu_store($this->getCacheKey($key), $value, (int)$ttl);
     }
@@ -43,7 +46,7 @@ class ApcuDriver extends Driver
     /**
      * @inheritDoc
      */
-    public function delete($key)
+    public function delete($key): bool
     {
         return (bool)apcu_delete($this->getCacheKey($key));
     }
@@ -51,7 +54,7 @@ class ApcuDriver extends Driver
     /**
      * @inheritDoc
      */
-    public function has($key)
+    public function has($key): bool
     {
         return (bool)apcu_exists($this->getCacheKey($key));
     }
@@ -59,12 +62,25 @@ class ApcuDriver extends Driver
     /**
      * @inheritDoc
      */
-    public function expire($key, $ttl)
+    public function expire(string $key, int $ttl): void
     {
         $key = $this->getCacheKey($key);
         $data = apcu_fetch($key, $success);
-        if($success){
+        if ($success) {
             apcu_store($key, $data, $ttl);
+        }
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getMultiplePrefix(string $prefix): Generator
+    {
+        $key = $this->getCacheKey($prefix . PrefixCacheInterface::SEPARATOR);
+        $length = strlen($key);
+        $iterator = new APCUIterator("/^$key/", APC_ITER_ALL);
+        foreach ($iterator as $item) {
+            yield substr($item['key'], $length) => $item['value'];
         }
     }
 }

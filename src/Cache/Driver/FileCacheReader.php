@@ -12,12 +12,12 @@ class FileCacheReader
     /**
      * @var array
      */
-    private $data;
+    private array $data;
 
     /**
      * @var SplFileObject
      */
-    private $handle;
+    private SplFileObject $handle;
 
     /**
      * 时间戳段长度
@@ -26,13 +26,13 @@ class FileCacheReader
 
     /**
      * FileCacheReader constructor.
-     * @param string|SplFileInfo $file
+     * @param SplFileInfo|string $file
      */
-    public function __construct($file)
+    public function __construct(SplFileInfo|string $file)
     {
-        if($file instanceof SplFileInfo){
-            $this->handle = $file->openFile('r');
-        }else{
+        if ($file instanceof SplFileInfo) {
+            $this->handle = $file->openFile();
+        } else {
             $this->handle = new SplFileObject($file, 'r');
         }
     }
@@ -40,13 +40,13 @@ class FileCacheReader
     /**
      * @return int
      */
-    public function getExpiredTime()
+    public function getExpiredTime(): int
     {
-        if( !isset($this->data['expired']) ){
+        if (!isset($this->data['expired'])) {
             $expired = $this->handle->fread(self::TIMESTAMP_LENGTH);
-            if( $expired === false ){
+            if ($expired === false) {
                 $expired = -1;
-            }else{
+            } else {
                 $expired = (int)$expired;
             }
             $this->data['expired'] = $expired;
@@ -57,8 +57,9 @@ class FileCacheReader
     /**
      * @return string
      */
-    public function getContent(){
-        if( !isset($this->data['content']) ){
+    public function getContent(): string
+    {
+        if (!isset($this->data['content'])) {
             $this->getExpiredTime();
             $this->data['content'] = $this->handle->fread($this->handle->getSize());
         }
@@ -68,7 +69,7 @@ class FileCacheReader
     /**
      * @return bool
      */
-    public function isExpired()
+    public function isExpired(): bool
     {
         $expired = $this->getExpiredTime();
         return $expired !== 0 && time() > $expired;

@@ -14,7 +14,7 @@ class Text implements ProtocolInterface
     /**
      * @inheritDoc
      */
-    public static function length($buffer)
+    public static function length(string $buffer): int
     {
         if (strlen($buffer) >= self::MAX_LEN) {
             return -1;
@@ -29,7 +29,7 @@ class Text implements ProtocolInterface
     /**
      * @inheritDoc
      */
-    public static function encode($buffer)
+    public static function encode(string $buffer): string
     {
         return trim($buffer) . "\n";
     }
@@ -37,7 +37,7 @@ class Text implements ProtocolInterface
     /**
      * @inheritDoc
      */
-    public static function decode($buffer)
+    public static function decode(string $buffer): string
     {
         return trim($buffer);
     }

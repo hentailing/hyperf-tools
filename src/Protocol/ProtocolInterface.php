@@ -10,17 +10,17 @@ interface ProtocolInterface
      * @param string $buffer
      * @return int
      */
-    public static function length($buffer);
+    public static function length(string $buffer): int;
 
     /**
      * @param string $buffer
      * @return string
      */
-    public static function encode($buffer);
+    public static function encode(string $buffer): string;
 
     /**
      * @param string $buffer
      * @return mixed
      */
-    public static function decode($buffer);
+    public static function decode(string $buffer): mixed;
 }

@@ -7,12 +7,12 @@ use Swoole\Table;
 return [
     // 应用设置
     'normal' => [
-        'service_local_ip' => env('SERVICE_LOCAL_IP', null),
+        'service_local_ip' => \Hyperf\Support\env('SERVICE_LOCAL_IP'),
     ],
     // 自增器配置
     'integer' => [
         'default' => [
-            'driver'     => Hyperf\Cache\Driver\RedisDriver::class,
+            'driver'     => Madoka\Cache\Integer\RedisDriver::class,
             'pool_class' => Hyperf\Redis\Redis::class,
         ],
     ],
@@ -20,7 +20,8 @@ return [
     'tables'  => [
         'default'   =>  [
             'size'  =>  1024,
-            'callback'  =>  function(Table $table){
+            'callback'  =>  function(Table $table): void
+            {
                 $table->column('name', Table::TYPE_INT, 8);
             },
             'conflictProportion' => 0.2,

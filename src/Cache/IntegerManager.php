@@ -15,14 +15,14 @@ class IntegerManager
     /**
      * @var ConfigInterface
      */
-    protected $config;
+    protected ConfigInterface $config;
 
-    protected $drivers = [];
+    protected array $drivers = [];
 
     /**
      * @var StdoutLoggerInterface
      */
-    protected $logger;
+    protected StdoutLoggerInterface $logger;
 
     public function __construct(ConfigInterface $config, StdoutLoggerInterface $logger)
     {
@@ -41,9 +41,9 @@ class IntegerManager
             throw new InvalidArgumentException(sprintf('The integer config %s is invalid.', $name));
         }
 
-        $driverClass = isset($config['driver']) ? $config['driver'] : RedisDriver::class;
+        $driverClass = $config['driver'] ?? RedisDriver::class;
 
-        $driver = make($driverClass, ['config' => $config]);
+        $driver = \Hyperf\Support\make($driverClass, ['config' => $config]);
 
         return $this->drivers[$name] = $driver;
     }

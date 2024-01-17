@@ -12,22 +12,22 @@ class FileIntegerReader
     /**
      * @var array
      */
-    private $data;
+    private array $data;
 
     /**
      * @var SplFileObject
      */
-    private $handle;
+    private SplFileObject $handle;
 
     /**
      * FileCacheReader constructor.
-     * @param string|SplFileInfo $file
+     * @param SplFileInfo|string $file
      */
-    public function __construct($file)
+    public function __construct(SplFileInfo|string $file)
     {
-        if($file instanceof SplFileInfo){
-            $this->handle = $file->openFile('r');
-        }else{
+        if ($file instanceof SplFileInfo) {
+            $this->handle = $file->openFile();
+        } else {
             $this->handle = new SplFileObject($file, 'r');
         }
         $this->load();
@@ -36,11 +36,12 @@ class FileIntegerReader
     /**
      * 请保持目录的写入唯一，并不保证读取数据100%正确
      */
-    private function load(){
+    private function load(): void
+    {
         $data = $this->handle->fread($this->handle->getSize());
         $this->data = [-1, 0];
-        if(!empty($data)){
-            foreach (explode('.', $data, 2) as $index => $value){
+        if (!empty($data)) {
+            foreach (explode('.', $data, 2) as $index => $value) {
                 $this->data[$index] = (int)$value;
             }
         }
@@ -49,7 +50,7 @@ class FileIntegerReader
     /**
      * @return int
      */
-    public function getExpiredTime()
+    public function getExpiredTime(): int
     {
         return $this->data[0];
     }
@@ -57,14 +58,15 @@ class FileIntegerReader
     /**
      * @return int
      */
-    public function getContent(){
+    public function getContent(): int
+    {
         return $this->data[1];
     }
 
     /**
      * @return bool
      */
-    public function isExpired()
+    public function isExpired(): bool
     {
         $expired = $this->getExpiredTime();
         return $expired !== 0 && time() > $expired;

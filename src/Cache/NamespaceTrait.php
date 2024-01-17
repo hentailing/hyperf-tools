@@ -4,29 +4,27 @@ declare(strict_types=1);
 
 namespace Madoka\Cache;
 
+use Madoka\Cache\Driver\DriverInterface;
+use Madoka\Cache\Integer\IntegerInterface;
+
 trait NamespaceTrait
 {
     /**
      * @var string[]
      */
-    protected $default;
-
-    /**
-     * @var object
-     */
-    protected $driver;
+    protected array $default;
 
     /**
      * @var string[]
      */
-    protected $keys = [];
+    protected array $keys = [];
 
     /**
      * NamespaceTrait constructor.
-     * @param object $driver
+     * @param IntegerInterface|DriverInterface $driver
      * @param string[] $default
      */
-    public function __construct($driver, $default = [])
+    public function __construct(IntegerInterface|DriverInterface $driver, array $default = [])
     {
         $this->driver = $driver;
         $this->default = $default;
@@ -36,23 +34,19 @@ trait NamespaceTrait
      * 获取一个新实例
      * @return static
      */
-    public function newInstance(){
+    public function newInstance(): static
+    {
         return new static($this->driver, $this->default);
     }
 
-    /**
-     * @param string $prefix
-     * @return $this
-     */
-    public function prefix($prefix){
-        array_push($this->keys, $prefix);
+    public function prefix(string $prefix): self
+    {
+        $this->keys[] = $prefix;
         return $this;
     }
 
-    /**
-     * @return $this
-     */
-    public function perv(){
+    public function perv(): self
+    {
         if(!empty($this->keys)){
             array_pop($this->keys);
         }
@@ -63,7 +57,8 @@ trait NamespaceTrait
      * @param string $separator
      * @return string
      */
-    public function join($separator = '.'){
+    public function join(string $separator = PrefixCacheInterface::SEPARATOR): string
+    {
         return implode($separator, array_merge($this->default, $this->keys));
     }
 
@@ -72,7 +67,8 @@ trait NamespaceTrait
      * @param string $separator
      * @return string
      */
-    public function name($name, $separator = '.'){
+    public function name(string $name, string $separator = PrefixCacheInterface::SEPARATOR): string
+    {
         return implode($separator, array_merge($this->default, $this->keys, [$name]));
     }
 }

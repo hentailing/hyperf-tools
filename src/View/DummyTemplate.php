@@ -15,16 +15,16 @@ class DummyTemplate
     /**
      * @var array
      */
-    public $config = [
-        'view_path'     => '',
-        'cache_path'    => '',
+    public array $config = [
+        'view_path' => '',
+        'cache_path' => '',
     ];
 
     /**
      * DummyTemplate constructor.
      * @param array $config
      */
-    public function __construct($config)
+    public function __construct(array $config)
     {
         $this->config = $config;
     }
@@ -34,13 +34,14 @@ class DummyTemplate
      * @param array $data
      * @return false|string
      */
-    public function render($template, $data){
+    public function render(string $template, array $data): bool|string
+    {
         $templateFile = $this->parseTemplateFile($template);
         // 页面缓存
         ob_start();
-        ob_implicit_flush(0);
-        if(!empty($data)){
-            extract($data, EXTR_OVERWRITE);
+        ob_implicit_flush(false);
+        if (!empty($data)) {
+            extract($data);
         }
         include $templateFile;
         return ob_get_clean();
@@ -50,9 +51,10 @@ class DummyTemplate
      * @param string $template
      * @return string
      */
-    private function parseTemplateFile($template){
+    private function parseTemplateFile(string $template): string
+    {
         if ('' == pathinfo($template, PATHINFO_EXTENSION)) {
-            if (0 !== strpos($template, '/')) {
+            if (!str_starts_with($template, '/')) {
                 $template = str_replace(['/', ':'], DIRECTORY_SEPARATOR, $template);
             } else {
                 $template = str_replace(['/', ':'], DIRECTORY_SEPARATOR, substr($template, 1));

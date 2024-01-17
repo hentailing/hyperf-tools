@@ -6,8 +6,8 @@ namespace Madoka\Cache\Driver;
 
 use Hyperf\Cache\Driver\Driver;
 use Hyperf\Cache\Exception\CacheException;
-use Hyperf\Cache\Exception\InvalidArgumentException;
-use Hyperf\Utils\Filesystem\Filesystem;
+use Hyperf\Support\Filesystem\Filesystem;
+use Madoka\Cache\PrefixCacheInterface;
 use Psr\Container\ContainerInterface;
 use Generator;
 use GlobIterator;
@@ -18,19 +18,19 @@ class FileSystemDriver extends Driver implements DriverInterface
     /**
      * @var string
      */
-    protected $storePath = BASE_PATH . '/runtime/caches';
+    protected string $storePath = BASE_PATH . '/runtime/caches';
 
     /**
      * @var Filesystem
      */
-    private $filesystem;
+    private Filesystem $filesystem;
 
     public function __construct(ContainerInterface $container, array $config)
     {
         parent::__construct($container, $config);
-        if (! file_exists($this->storePath)) {
+        if (!file_exists($this->storePath)) {
             $results = mkdir($this->storePath, 0755, true);
-            if (! $results) {
+            if (!$results) {
                 throw new CacheException('Has no permission to create cache directory!');
             }
         }
@@ -40,14 +40,14 @@ class FileSystemDriver extends Driver implements DriverInterface
     /**
      * @inheritDoc
      */
-    public function get($key, $default = null)
+    public function get(string $key, mixed $default = null): mixed
     {
         $file = $this->getCacheKey($key);
-        if( !is_file($file) ){
+        if (!is_file($file)) {
             return $default;
         }
         $reader = new FileCacheReader($file);
-        if( $reader->isExpired() ){
+        if ($reader->isExpired()) {
             return $default;
         }
         return $this->packer->unpack($reader->getContent());
@@ -56,31 +56,32 @@ class FileSystemDriver extends Driver implements DriverInterface
     /**
      * @inheritDoc
      */
-    public function set($key, $value, $ttl = null)
+    public function set(string $key, mixed $value, null|int|\DateInterval $ttl = null): bool
     {
         $file = $this->getCacheKey($key);
         $content = $this->packer->pack($value);
-        if($ttl > 0){
+        $ttl = $this->secondsUntil($ttl);
+        if ($ttl > 0) {
             $seconds = time() + $ttl;
-        }else{
+        } else {
             $seconds = 0;
         }
         $result = $this->filesystem->put($file, sprintf("%010d\n%s", $seconds, $content));
 
-        return (bool) $result;
+        return (bool)$result;
     }
 
     /**
      * @inheritDoc
      */
-    public function delete($key)
+    public function delete(string $key): bool
     {
         $file = $this->getCacheKey($key);
         if (file_exists($file)) {
             if (!is_writable($file)) {
                 return false;
             }
-            unlink($file);
+            return $this->filesystem->delete($file);
         }
 
         return true;
@@ -89,7 +90,7 @@ class FileSystemDriver extends Driver implements DriverInterface
     /**
      * @inheritDoc
      */
-    public function clear()
+    public function clear(): bool
     {
         return $this->clearPrefix('');
     }
@@ -97,14 +98,10 @@ class FileSystemDriver extends Driver implements DriverInterface
     /**
      * @inheritDoc
      */
-    public function getMultiple($keys, $default = null)
+    public function getMultiple(iterable $keys, mixed $default = null): iterable
     {
-        if (!is_array($keys)) {
-            throw new InvalidArgumentException('The keys is invalid!');
-        }
-
         $result = [];
-        foreach ($keys as $i => $key) {
+        foreach ($keys as $key) {
             $result[$key] = $this->get($key, $default);
         }
 
@@ -114,11 +111,8 @@ class FileSystemDriver extends Driver implements DriverInterface
     /**
      * @inheritDoc
      */
-    public function setMultiple($values, $ttl = null)
+    public function setMultiple(iterable $values, null|int|\DateInterval $ttl = null): bool
     {
-        if (!is_array($values)) {
-            throw new InvalidArgumentException('The values is invalid!');
-        }
         foreach ($values as $key => $value) {
             $this->set($key, $value, $ttl);
         }
@@ -129,26 +123,21 @@ class FileSystemDriver extends Driver implements DriverInterface
     /**
      * @inheritDoc
      */
-    public function deleteMultiple($keys)
+    public function deleteMultiple(iterable $keys): bool
     {
-        if (!is_array($keys)) {
-            throw new InvalidArgumentException('The keys is invalid!');
-        }
-
-        foreach ($keys as $index => $key) {
+        foreach ($keys as $key) {
             $this->delete($key);
         }
-
         return true;
     }
 
     /**
      * @inheritDoc
      */
-    public function has($key)
+    public function has(string $key): bool
     {
         $file = $this->getCacheKey($key);
-        if( !is_file($file) ){
+        if (!is_file($file)) {
             return false;
         }
         $reader = new FileCacheReader($file);
@@ -158,7 +147,7 @@ class FileSystemDriver extends Driver implements DriverInterface
     /**
      * @inheritDoc
      */
-    public function fetch(string $key, $default = null): array
+    public function fetch(string $key, mixed $default = null): array
     {
         $file = $this->getCacheKey($key);
         if (!is_file($file)) {
@@ -182,7 +171,7 @@ class FileSystemDriver extends Driver implements DriverInterface
             if ($splFileInfo->isDir()) {
                 continue;
             }
-            unlink($splFileInfo->getPathname());
+            $this->filesystem->delete($splFileInfo->getPathname());
         }
 
         return true;
@@ -193,12 +182,12 @@ class FileSystemDriver extends Driver implements DriverInterface
      */
     public function getPrefixKeys(string $prefix): Generator
     {
-        $cacheKey = sprintf('%s%s%s', $this->getPrefix(), $prefix, DriverInterface::SEPARATOR);
-        $prefixLength = strlen(sprintf('%s%s%s', $this->prefix, $prefix, DriverInterface::SEPARATOR));
-        $iterator = new GlobIterator($cacheKey.'*.cache');
-        foreach ($iterator as $file){
+        $cacheKey = sprintf('%s%s%s', $this->getPrefix(), $prefix, PrefixCacheInterface::SEPARATOR);
+        $prefixLength = strlen(sprintf('%s%s%s', $this->prefix, $prefix, PrefixCacheInterface::SEPARATOR));
+        $iterator = new GlobIterator($cacheKey . '*.cache');
+        foreach ($iterator as $file) {
             $reader = new FileCacheReader($file);
-            if(!$reader->isExpired() ){
+            if (!$reader->isExpired()) {
                 yield substr($file->getFilename(), $prefixLength, -6);
             }
         }
@@ -209,12 +198,12 @@ class FileSystemDriver extends Driver implements DriverInterface
      */
     public function getMultiplePrefix(string $prefix): Generator
     {
-        $cacheKey = sprintf('%s%s%s', $this->getPrefix(), $prefix, DriverInterface::SEPARATOR);
-        $prefixLength = strlen(sprintf('%s%s%s', $this->prefix, $prefix, DriverInterface::SEPARATOR));
-        $iterator = new GlobIterator($cacheKey.'*.cache');
-        foreach ($iterator as $file){
+        $cacheKey = sprintf('%s%s%s', $this->getPrefix(), $prefix, PrefixCacheInterface::SEPARATOR);
+        $prefixLength = strlen(sprintf('%s%s%s', $this->prefix, $prefix, PrefixCacheInterface::SEPARATOR));
+        $iterator = new GlobIterator($cacheKey . '*.cache');
+        foreach ($iterator as $file) {
             $reader = new FileCacheReader($file);
-            if(! $reader->isExpired() ){
+            if (!$reader->isExpired()) {
                 yield substr($file->getFilename(), $prefixLength, -6) => $this->packer->unpack($reader->getContent());
             }
         }
@@ -226,23 +215,23 @@ class FileSystemDriver extends Driver implements DriverInterface
     public function countPrefix(string $prefix): int
     {
         $count = 0;
-        $cacheKey = sprintf('%s%s%s', $this->getPrefix(), $prefix, DriverInterface::SEPARATOR);
+        $cacheKey = sprintf('%s%s%s', $this->getPrefix(), $prefix, PrefixCacheInterface::SEPARATOR);
         $iterator = new GlobIterator($cacheKey . '*.cache');
-        foreach ($iterator as $file){
+        foreach ($iterator as $file) {
             $reader = new FileCacheReader($file);
-            if(! $reader->isExpired()){
+            if (!$reader->isExpired()) {
                 $count++;
             }
         }
         return $count;
     }
 
-    public function getCacheKey(string $key)
+    public function getCacheKey(string $key): string
     {
         return $this->getPrefix() . $key . '.cache';
     }
 
-    protected function getPrefix()
+    protected function getPrefix(): string
     {
         return $this->storePath . DIRECTORY_SEPARATOR . $this->prefix;
     }

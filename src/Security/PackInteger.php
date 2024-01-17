@@ -16,16 +16,16 @@ class PackInteger implements IntegerPackInterface
     /**
      * @inheritDoc
      */
-    public function getPack()
+    public function getPack(): string
     {
         return pack(implode('', $this->getFormat()), ...$this->getIntegers());
     }
 
-    public static function fromPack($packString)
+    public static function fromPack($packString): static
     {
         $instance = new static();
         $formats = [];
-        foreach ($instance->getFormat() as $index => $format){
+        foreach ($instance->getFormat() as $index => $format) {
             $formats[] = $format . 'index' . $index;
         }
         $instance->setIntegers(array_values(unpack(implode('/', $formats), $packString)));
@@ -36,7 +36,8 @@ class PackInteger implements IntegerPackInterface
      * @param int[] $integers
      * @return static
      */
-    public static function fromIntegers($integers){
+    public static function fromIntegers(array $integers): static
+    {
         $instance = new static();
         $instance->setIntegers($integers);
         return $instance;
@@ -45,7 +46,7 @@ class PackInteger implements IntegerPackInterface
     /**
      * @return int[]
      */
-    public function getIntegers()
+    public function getIntegers(): array
     {
         return $this->integers;
     }
@@ -53,7 +54,7 @@ class PackInteger implements IntegerPackInterface
     /**
      * @return string[]
      */
-    public function getFormat()
+    public function getFormat(): array
     {
         return $this->format;
     }
@@ -62,9 +63,9 @@ class PackInteger implements IntegerPackInterface
      * @param int[] $integers
      * @return $this
      */
-    public function setIntegers($integers)
+    public function setIntegers(array $integers): self
     {
-        if(count($integers) != count($this->getFormat())){
+        if (count($integers) != count($this->getFormat())) {
             throw new \RuntimeException('数字数量与format不匹配');
         }
         $this->integers = $integers;

@@ -4,22 +4,24 @@ declare(strict_types=1);
 
 namespace Madoka\Cache\Integer;
 
+use Generator;
+use GlobIterator;
 use Hyperf\Cache\Exception\CacheException;
-use Hyperf\Utils\Filesystem\Filesystem;
+use Hyperf\Support\Filesystem\Filesystem;
+use Madoka\Cache\PrefixCacheInterface;
 use Psr\Container\ContainerInterface;
 
 class FileSystemDriver extends Driver
 {
-
     /**
      * @var string
      */
-    protected $storePath = BASE_PATH . '/runtime/integers';
+    protected string $storePath = BASE_PATH . '/runtime/integers';
 
     /**
      * @var Filesystem
      */
-    private $filesystem;
+    private Filesystem $filesystem;
 
     public function __construct(ContainerInterface $container, array $config)
     {
@@ -37,7 +39,7 @@ class FileSystemDriver extends Driver
     /**
      * @inheritDoc
      */
-    public function inc(string $key, int $step = 1)
+    public function inc(string $key, int $step = 1): int
     {
         $file = $this->getCacheKey($key);
         $integer = 0;
@@ -57,7 +59,7 @@ class FileSystemDriver extends Driver
     /**
      * @inheritDoc
      */
-    public function dec(string $key, int $step = 1)
+    public function dec(string $key, int $step = 1): int
     {
         return $this->inc($key, -$step);
     }
@@ -65,7 +67,7 @@ class FileSystemDriver extends Driver
     /**
      * @inheritDoc
      */
-    public function get($key, callable $callable)
+    public function get(string $key, callable $callable): int
     {
         $file = $this->getCacheKey($key);
         if(is_file($file)){
@@ -82,7 +84,7 @@ class FileSystemDriver extends Driver
     /**
      * @inheritDoc
      */
-    public function set($key, $value, $ttl = null)
+    public function set(string $key, int $value, int $ttl = null): bool
     {
         $file = $this->getCacheKey($key);
         return $this->putContent($file, $value, $ttl);
@@ -91,14 +93,14 @@ class FileSystemDriver extends Driver
     /**
      * @inheritDoc
      */
-    public function delete($key)
+    public function delete(string $key): bool
     {
         $file = $this->getCacheKey($key);
         if (file_exists($file)) {
             if (!is_writable($file)) {
                 return false;
             }
-            unlink($file);
+            return $this->filesystem->delete($file);
         }
 
         return true;
@@ -107,7 +109,7 @@ class FileSystemDriver extends Driver
     /**
      * @inheritDoc
      */
-    public function has($key)
+    public function has(string $key): bool
     {
         $file = $this->getCacheKey($key);
         if( !is_file($file) ){
@@ -120,7 +122,7 @@ class FileSystemDriver extends Driver
     /**
      * @inheritDoc
      */
-    public function expire($key, $ttl)
+    public function expire(string $key, int $ttl): void
     {
         $file = $this->getCacheKey($key);
         if(is_file($file)){
@@ -132,18 +134,36 @@ class FileSystemDriver extends Driver
     }
 
     /**
+     * @inheritDoc
+     */
+    public function getMultiplePrefix(string $prefix): Generator
+    {
+        $cacheKey = sprintf('%s%s%s', $this->getPrefix(), $prefix, PrefixCacheInterface::SEPARATOR);
+        $prefixLength = strlen(sprintf('%s%s%s', $this->prefix, $prefix, PrefixCacheInterface::SEPARATOR));
+        $iterator = new GlobIterator($cacheKey . '*.cache');
+        foreach ($iterator as $file) {
+            $reader = new FileIntegerReader($file);
+            if (!$reader->isExpired()) {
+                yield substr($file->getFilename(), $prefixLength, -6) => $reader->getContent();
+            }
+        }
+    }
+
+    /**
      * @param string $file
      * @param int $value
      * @param int $ttl
      * @return bool
      */
-    protected function putContent($file, $value, $ttl){
+    protected function putContent(string $file, int $value, int $ttl): bool
+    {
         if($ttl > 0){
             $seconds = time() + $ttl;
         }else{
             $seconds = 0;
         }
-        return (bool)file_put_contents($file, sprintf('%d.%d', $seconds, $value));
+
+        return (bool)$this->filesystem->put($file, sprintf('%d.%d', $seconds, $value));
     }
 
     /**
@@ -151,7 +171,7 @@ class FileSystemDriver extends Driver
      * @param string $key
      * @return string
      */
-    public function getCacheKey(string $key)
+    public function getCacheKey(string $key): string
     {
         return $this->getPrefix() . $key . '.integer';
     }
@@ -160,7 +180,7 @@ class FileSystemDriver extends Driver
      * 获取前缀
      * @return string
      */
-    protected function getPrefix()
+    protected function getPrefix(): string
     {
         return $this->storePath . DIRECTORY_SEPARATOR . $this->prefix;
     }

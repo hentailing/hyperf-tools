@@ -13,9 +13,9 @@ class HashSigner
     /**
      * @var string
      */
-    protected $key;
+    protected string $key;
 
-    public function __construct($key)
+    public function __construct(string $key)
     {
         $this->withKey($key);
     }
@@ -24,7 +24,8 @@ class HashSigner
      * @param string $key
      * @return $this
      */
-    public function withKey($key){
+    public function withKey(string $key): self
+    {
         $this->key = $key;
         return $this;
     }
@@ -32,7 +33,8 @@ class HashSigner
     /**
      * @return string
      */
-    public function getKey(){
+    public function getKey(): string
+    {
         return $this->key;
     }
 
@@ -40,10 +42,11 @@ class HashSigner
      * 签名
      * @param string $string
      * @param string|null $algorithm
-     * @return false|string
+     * @return string
      */
-    public function hash(string $string, string $algorithm = null){
-        if( is_null($algorithm) ){
+    public function hash(string $string, string $algorithm = null): string
+    {
+        if (is_null($algorithm)) {
             $algorithm = 'md5';
         }
         return hash($algorithm, sprintf('%s%s', $string, $this->key));
@@ -55,8 +58,9 @@ class HashSigner
      * @param string|null $algorithm
      * @return string
      */
-    public function hash_hmac(string $string, string $algorithm = null){
-        if( is_null($algorithm) ){
+    public function hash_hmac(string $string, string $algorithm = null): string
+    {
+        if (is_null($algorithm)) {
             $algorithm = 'md5';
         }
         return hash_hmac($algorithm, $string, $this->key);

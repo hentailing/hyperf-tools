@@ -12,7 +12,7 @@ use Hyperf\View\Engine\EngineInterface;
  */
 class DummyTemplateEngine implements EngineInterface
 {
-    public function render($template, $data, $config): string
+    public function render(string $template, array $data, array $config): string
     {
         $engine = new DummyTemplate($config);
         return $engine->render($template, $data);

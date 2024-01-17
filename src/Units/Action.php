@@ -9,10 +9,11 @@ class Action
     /**
      * @param int $code
      * @param string $message
-     * @param mixed $data
+     * @param mixed|null $data
      * @return array
      */
-    public static function error($code, $message, $data = null){
+    public static function error(int $code, string $message, mixed $data = null): array
+    {
         return [
             'code' => $code,
             'message' => $message,
@@ -21,11 +22,12 @@ class Action
     }
 
     /**
-     * @param mixed $data
+     * @param mixed|null $data
      * @param string $message
      * @return array
      */
-    public static function success($data = null, $message = 'success'){
+    public static function success(mixed $data = null, string $message = 'success'): array
+    {
         return self::error(0, $message, $data);
     }
 }

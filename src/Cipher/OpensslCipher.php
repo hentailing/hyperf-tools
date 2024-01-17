@@ -13,10 +13,10 @@ use Madoka\Exception\EncryptException;
  */
 class OpensslCipher
 {
-    protected $config = [
+    protected array $config = [
         'cipher' => 'AES-128-CBC',
         'option' => OPENSSL_RAW_DATA,
-        'key'    => '',
+        'key' => '',
         'iv_length' => 0,
     ];
 
@@ -32,12 +32,12 @@ class OpensslCipher
      * @return string
      * @throws EncryptException
      */
-    public function encrypt(string $string)
+    public function encrypt(string $string): string
     {
-        return $this->pack(function ($iv) use ($string){
+        return $this->pack(function ($iv) use ($string) {
             $key = $this->getKey();
             $encrypt = openssl_encrypt($string, $this->getCipher(), $key, $this->getOption(), $iv);
-            if($encrypt === false){
+            if ($encrypt === false) {
                 throw new EncryptException('加密失败 ' . openssl_error_string());
             }
             return $encrypt;
@@ -49,12 +49,12 @@ class OpensslCipher
      * @return string
      * @throws EncryptException
      */
-    public function decrypt(string $encrypt)
+    public function decrypt(string $encrypt): string
     {
-        return $this->unpack(function ($body, $iv) use ($encrypt){
+        return $this->unpack(function ($body, $iv) use ($encrypt) {
             $key = $this->getKey();
             $decrypted = openssl_decrypt($body, $this->getCipher(), $key, $this->getOption(), $iv);
-            if($decrypted === false){
+            if ($decrypted === false) {
                 throw new EncryptException('解密失败 ' . openssl_error_string());
             }
             return $decrypted;
@@ -67,7 +67,8 @@ class OpensslCipher
      * @return $this
      * @throws EncryptException
      */
-    public function withKey(string $key){
+    public function withKey(string $key): self
+    {
         $this->config['key'] = $key;
         $this->checkKey();
         return $this;
@@ -79,7 +80,8 @@ class OpensslCipher
      * @return $this
      * @throws EncryptException
      */
-    public function withCipher(string $cipher){
+    public function withCipher(string $cipher): self
+    {
         $this->config['cipher'] = $cipher;
         return $this->makeIvLength();
     }
@@ -89,7 +91,8 @@ class OpensslCipher
      * @param int $option
      * @return $this
      */
-    public function withOption(int $option){
+    public function withOption(int $option): self
+    {
         $this->config['option'] = $option;
         return $this;
     }
@@ -97,28 +100,32 @@ class OpensslCipher
     /**
      * @return string
      */
-    public function getKey(){
+    public function getKey(): string
+    {
         return $this->config['key'];
     }
 
     /**
      * @return string
      */
-    public function getCipher(){
+    public function getCipher(): string
+    {
         return $this->config['cipher'];
     }
 
     /**
      * @return int
      */
-    public function getOption(){
+    public function getOption(): int
+    {
         return $this->config['option'];
     }
 
     /**
      * @return int
      */
-    public function getIvLength(){
+    public function getIvLength(): int
+    {
         return $this->config['iv_length'];
     }
 
@@ -127,11 +134,12 @@ class OpensslCipher
      * @return string
      * @throws EncryptException
      */
-    protected function pack($callback){
+    protected function pack(callable $callback): string
+    {
         $length = $this->getIvLength();
         $iv = '';
         $pack = '';
-        switch ($length){
+        switch ($length) {
             case 4:
                 $iv = rand(0, 9999);
                 $pack = pack('S', $iv);
@@ -160,17 +168,18 @@ class OpensslCipher
      * @return string
      * @throws EncryptException
      */
-    protected function unpack($callback, string $encrypt){
+    protected function unpack(callable $callback, string $encrypt): string
+    {
         $length = $this->getIvLength();
-        switch ($length){
+        switch ($length) {
             case 4:
-                if( strlen($encrypt) < 2 ){
+                if (strlen($encrypt) < 2) {
                     throw new EncryptException('encrypt 字符串长度小于2');
                 }
                 $head = substr($encrypt, 0, 2);
                 $body = substr($encrypt, 2);
                 $temp = unpack('Siv', $head);
-                if( $temp === false ){
+                if ($temp === false) {
                     throw new EncryptException('unpack 失败');
                 }
                 $iv = $temp['iv'];
@@ -178,21 +187,21 @@ class OpensslCipher
             case 8:
             case 12:
             case 16:
-                if( strlen($encrypt) < 4 ){
+                if (strlen($encrypt) < 4) {
                     throw new EncryptException('encrypt 字符串长度小于4');
                 }
                 $head = substr($encrypt, 0, 4);
                 $body = substr($encrypt, 4);
                 $temp = unpack('Liv', $head);
-                if( $temp === false ){
+                if ($temp === false) {
                     throw new EncryptException('unpack 失败');
                 }
                 $iv = $temp['iv'];
-                if( $length === 12 ){
+                if ($length === 12) {
                     $iv = sprintf('%012d', $iv);
                 }
 
-                if( $length === 16 ){
+                if ($length === 16) {
                     $iv = sprintf('%016d', $iv);
                 }
                 break;
@@ -208,10 +217,11 @@ class OpensslCipher
     /**
      * @return $this
      */
-    protected function makeIvLength(){
+    protected function makeIvLength(): self
+    {
         $cipher = $this->getCipher();
         $length = openssl_cipher_iv_length($cipher);
-        if($length === false){
+        if ($length === false) {
             throw new EncryptException('获取iv长度失败' . openssl_error_string());
         }
         $this->config['iv_length'] = $length;
@@ -221,8 +231,9 @@ class OpensslCipher
     /**
      * @throws EncryptException
      */
-    protected function checkKey(){
-        if(empty($this->config['key'])){
+    protected function checkKey(): void
+    {
+        if (empty($this->config['key'])) {
             throw new EncryptException('请设置密钥');
         }
     }

@@ -13,7 +13,7 @@ abstract class Validate
     /**
      * @var ValidatorFactoryInterface
      */
-    private $validatorFactory;
+    private ValidatorFactoryInterface $validatorFactory;
 
     public function __construct(ContainerInterface $container)
     {
@@ -24,21 +24,21 @@ abstract class Validate
      * 默认验证规则
      * @var array
      */
-    private static $defaultRule = [
-        'page'      =>  'integer|min:1',
-        'size'      =>  'integer|min:1',
-        'last_id'   =>  'integer|min:1'
+    private static array $defaultRule = [
+        'page' => 'integer|min:1',
+        'size' => 'integer|min:1',
+        'last_id' => 'integer|min:1'
     ];
 
     /**
-     * @param $data
-     * @param string $scene
+     * @param array $data
+     * @param string|null $scene
      * @return ValidatorInterface
-     * @throws ValidationException
      */
-    public function check($data, $scene = null){
+    public function check(array $data, string $scene = null): ValidatorInterface
+    {
         $validator = $this->validatorFactory->make($data, $this->getRule($scene), $this->messages(), $this->attributes());
-        if( $validator->fails() ){
+        if ($validator->fails()) {
             throw new ValidationException($validator);
         }
         return $validator;
@@ -48,13 +48,14 @@ abstract class Validate
      * 当前验证规则
      * @return array
      */
-    abstract public function rules();
+    abstract public function rules(): array;
 
     /**
      * 验证提示信息
      * @return array
      */
-    public function messages(){
+    public function messages(): array
+    {
         return [];
     }
 
@@ -62,25 +63,27 @@ abstract class Validate
      * 自定义场景
      * @return array
      */
-    abstract public function scenes();
+    abstract public function scenes(): array;
 
     /**
      * 自定义属性名称
      * @return array
      */
-    public function attributes(){
+    public function attributes(): array
+    {
         return [];
     }
 
-    private function getRule($scene = null){
+    private function getRule(string $scene = null): array
+    {
         $rules = [];
         $rule = array_merge(self::$defaultRule, $this->rules());
         $scenes = $this->scenes();
-        if( !is_null($scene) && isset( $scenes[$scene] ) ){
-            foreach ($scenes[$scene] as $key){
+        if (!is_null($scene) && isset($scenes[$scene])) {
+            foreach ($scenes[$scene] as $key) {
                 $rules[$key] = $rule[$key];
             }
-        }else{
+        } else {
             $rules = $rule;
         }
         return $rules;
