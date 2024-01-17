@@ -66,7 +66,8 @@ abstract class RSACipher
      * @return string
      * @throws EncryptException
      */
-    protected function getFileContent($file){
+    protected function getFileContent(string $file): string
+    {
         $splFile = new SplFileInfo($file);
         if( ! $splFile->isFile() ){
             throw new EncryptException( '密钥文件不存在 '.$file);

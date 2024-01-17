@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Madoka\Cache\Integer;
 
-use Generator;
 use Madoka\Cache\PrefixCacheInterface;
 
 interface IntegerInterface extends PrefixCacheInterface
