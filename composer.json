@@ -4,7 +4,7 @@
     "type": "library",
     "license": "MIT",
     "require": {
-        "hyperf/contract": "^2.2"
+        "hyperf/contract": "^3.0"
     },
     "autoload": {
         "psr-4": {
