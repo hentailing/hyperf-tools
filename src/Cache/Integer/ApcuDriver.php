@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Madoka\Cache\Integer;
 
+use APCUIterator;
 use Generator;
 use Madoka\Cache\PrefixCacheInterface;
 

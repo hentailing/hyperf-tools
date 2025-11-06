@@ -9,7 +9,6 @@ use ArrayAccess;
 use ArrayIterator;
 use IteratorAggregate;
 use JsonSerializable;
-use stdClass;
 
 /**
  * 简便实体内用于数组对象处理
@@ -103,9 +102,9 @@ class Entity implements IteratorAggregate, JsonSerializable, ArrayAccess, Arraya
     /**
      * @inheritDoc
      */
-    public function jsonSerialize(): stdClass|array
+    public function jsonSerialize(): null|array
     {
-        return empty($this->data) ? new stdClass() : $this->data;
+        return empty($this->data) ? null : $this->data;
     }
 
     public function toArray(): array
