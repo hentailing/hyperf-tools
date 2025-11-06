@@ -4,21 +4,12 @@ declare(strict_types=1);
 
 namespace Madoka\Cache\Driver;
 
-use Hyperf\Cache\Driver\RedisDriver as BaseRedis;
+use Hyperf\Cache\Driver\RedisDriver as BaseRedisDriver;
 use Madoka\Cache\PrefixCacheInterface;
-use Psr\Container\ContainerInterface;
 use Generator;
 
-class RedisDriver extends BaseRedis implements DriverInterface
+class RedisDriver extends BaseRedisDriver implements DriverInterface
 {
-
-    public function __construct(ContainerInterface $container, array $config)
-    {
-        parent::__construct($container, $config);
-        if (isset($config['pool_class'])) {
-            $this->redis = $container->get($config['pool_class']);
-        }
-    }
 
     /**
      * 获取前缀Key
