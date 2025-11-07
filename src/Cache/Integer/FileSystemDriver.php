@@ -163,7 +163,7 @@ class FileSystemDriver extends Driver
             $seconds = 0;
         }
 
-        return (bool)$this->filesystem->put($file, sprintf('%d.%d', $seconds, $value));
+        return (bool)$this->filesystem->put($file, FileIntegerReader::pack($seconds, $value));
     }
 
     /**

@@ -5,19 +5,22 @@ declare(strict_types=1);
 namespace Madoka\Cache\Integer;
 
 use SplFileInfo;
-use SplFileObject;
 
 class FileIntegerReader
 {
     /**
-     * @var array
+     * 过期时间
+     * @var int
      */
-    private array $data;
+    private int $expired = -1;
 
     /**
-     * @var SplFileObject
+     * 自增值
+     * @var int
      */
-    private SplFileObject $handle;
+    private int $content = 0;
+
+    private const PACK_CONTENT_LENGTH = 16;
 
     /**
      * FileCacheReader constructor.
@@ -26,24 +29,12 @@ class FileIntegerReader
     public function __construct(SplFileInfo|string $file)
     {
         if ($file instanceof SplFileInfo) {
-            $this->handle = $file->openFile();
+            $content = $file->openFile()->fread(self::PACK_CONTENT_LENGTH);
         } else {
-            $this->handle = new SplFileObject($file, 'r');
+            $content = file_get_contents($file);
         }
-        $this->load();
-    }
-
-    /**
-     * 请保持目录的写入唯一，并不保证读取数据100%正确
-     */
-    private function load(): void
-    {
-        $data = $this->handle->fread($this->handle->getSize());
-        $this->data = [-1, 0];
-        if (!empty($data)) {
-            foreach (explode('.', $data, 2) as $index => $value) {
-                $this->data[$index] = (int)$value;
-            }
+        if (!empty($content)) {
+            list($this->expired, $this->content) = unpack('P2', $content);
         }
     }
 
@@ -52,7 +43,7 @@ class FileIntegerReader
      */
     public function getExpiredTime(): int
     {
-        return $this->data[0];
+        return $this->expired;
     }
 
     /**
@@ -60,7 +51,7 @@ class FileIntegerReader
      */
     public function getContent(): int
     {
-        return $this->data[1];
+        return $this->content;
     }
 
     /**
@@ -70,5 +61,16 @@ class FileIntegerReader
     {
         $expired = $this->getExpiredTime();
         return $expired !== 0 && time() > $expired;
+    }
+
+    /**
+     * 将内容打包为string
+     * @param int $expired
+     * @param int $content
+     * @return string
+     */
+    public static function pack(int $expired, int $content): string
+    {
+        return pack('P2', $expired, $content);
     }
 }

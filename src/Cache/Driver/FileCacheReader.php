@@ -5,53 +5,26 @@ declare(strict_types=1);
 namespace Madoka\Cache\Driver;
 
 use SplFileInfo;
-use SplFileObject;
 
-class FileCacheReader
+class FileCacheReader extends FileCacheExpireReader
 {
     /**
-     * @var array
+     * 缓存内容
+     * @var string
      */
-    private array $data;
+    private string $content;
 
-    /**
-     * @var SplFileObject
-     */
-    private SplFileObject $handle;
-
-    /**
-     * 时间戳段长度
-     */
-    private const TIMESTAMP_LENGTH = 11;
-
-    /**
-     * FileCacheReader constructor.
-     * @param SplFileInfo|string $file
-     */
-    public function __construct(SplFileInfo|string $file)
+    protected function load(SplFileInfo|string $file): void
     {
         if ($file instanceof SplFileInfo) {
-            $this->handle = $file->openFile();
+            $content = $file->openFile()->fread($file->getSize());
         } else {
-            $this->handle = new SplFileObject($file, 'r');
+            $content = file_get_contents($file);
         }
-    }
-
-    /**
-     * @return int
-     */
-    public function getExpiredTime(): int
-    {
-        if (!isset($this->data['expired'])) {
-            $expired = $this->handle->fread(self::TIMESTAMP_LENGTH);
-            if ($expired === false) {
-                $expired = -1;
-            } else {
-                $expired = (int)$expired;
-            }
-            $this->data['expired'] = $expired;
+        if ($content !== false) {
+            $this->expired = (int)substr($content, 0, self::TIMESTAMP_LENGTH);
+            $this->content = substr($content, self::TIMESTAMP_LENGTH);
         }
-        return $this->data['expired'];
     }
 
     /**
@@ -59,11 +32,7 @@ class FileCacheReader
      */
     public function getContent(): string
     {
-        if (!isset($this->data['content'])) {
-            $this->getExpiredTime();
-            $this->data['content'] = $this->handle->fread($this->handle->getSize());
-        }
-        return (string)$this->data['content'];
+        return $this->content;
     }
 
     /**

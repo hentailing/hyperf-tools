@@ -66,7 +66,7 @@ class FileSystemDriver extends Driver implements DriverInterface
         } else {
             $seconds = 0;
         }
-        $result = $this->filesystem->put($file, sprintf("%010d\n%s", $seconds, $content));
+        $result = $this->filesystem->put($file, FileCacheReader::pack($seconds, $content));
 
         return (bool)$result;
     }
@@ -186,7 +186,7 @@ class FileSystemDriver extends Driver implements DriverInterface
         $prefixLength = strlen(sprintf('%s%s%s', $this->prefix, $prefix, PrefixCacheInterface::SEPARATOR));
         $iterator = new GlobIterator($cacheKey . '*.cache');
         foreach ($iterator as $file) {
-            $reader = new FileCacheReader($file);
+            $reader = new FileCacheExpireReader($file);
             if (!$reader->isExpired()) {
                 yield substr($file->getFilename(), $prefixLength, -6);
             }
@@ -218,7 +218,7 @@ class FileSystemDriver extends Driver implements DriverInterface
         $cacheKey = sprintf('%s%s%s', $this->getPrefix(), $prefix, PrefixCacheInterface::SEPARATOR);
         $iterator = new GlobIterator($cacheKey . '*.cache');
         foreach ($iterator as $file) {
-            $reader = new FileCacheReader($file);
+            $reader = new FileCacheExpireReader($file);
             if (!$reader->isExpired()) {
                 $count++;
             }
