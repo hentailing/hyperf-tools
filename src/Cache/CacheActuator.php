@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Madoka\Cache;
 
 use Madoka\Cache\Driver\DriverInterface;
-use Generator;
 use Psr\SimpleCache\CacheInterface;
 
 /**
@@ -114,18 +113,18 @@ class CacheActuator implements CacheInterface
 
     /**
      * 获取当前所有缓存key迭代器
-     * @return Generator
+     * @return iterable<string>
      */
-    public function getKeys(): Generator
+    public function getKeys(): iterable
     {
         yield from $this->driver->getPrefixKeys($this->join());
     }
 
     /**
      * 获取当前所有缓存内容迭代器
-     * @return Generator
+     * @return iterable<string, mixed>
      */
-    public function getValues(): Generator
+    public function getValues(): iterable
     {
         yield from $this->driver->getPrefixKeys($this->join());
     }

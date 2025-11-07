@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Madoka\Cache\Integer;
 
-use Generator;
 use Hyperf\Cache\Exception\CacheException;
 use Madoka\Cache\PrefixCacheInterface;
 use Madoka\Memory\ThreadMapManager;
@@ -96,7 +95,7 @@ class SwooleThreadMapDriver extends Driver
     /**
      * @inheritDoc
      */
-    public function getMultiplePrefix(string $prefix): Generator
+    public function getMultiplePrefix(string $prefix): iterable
     {
         $cacheKey = $this->getCacheKey($prefix) . PrefixCacheInterface::SEPARATOR;
         $prefixLength = strlen($cacheKey);

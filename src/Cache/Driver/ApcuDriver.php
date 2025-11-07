@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Madoka\Cache\Driver;
 
-use Generator;
 use Hyperf\Cache\Driver\Driver;
 use APCUIterator;
 use Madoka\Cache\PrefixCacheInterface;
@@ -141,7 +140,7 @@ class ApcuDriver extends Driver implements DriverInterface
     /**
      * @inheritDoc
      */
-    public function getMultiplePrefix(string $prefix): Generator
+    public function getMultiplePrefix(string $prefix): iterable
     {
         $key = $this->getCacheKey($prefix . PrefixCacheInterface::SEPARATOR);
         $length = strlen($key);
@@ -154,7 +153,7 @@ class ApcuDriver extends Driver implements DriverInterface
     /**
      * @inheritDoc
      */
-    public function getPrefixKeys(string $prefix): Generator
+    public function getPrefixKeys(string $prefix): iterable
     {
         $key = $this->getCacheKey($prefix . PrefixCacheInterface::SEPARATOR);
         $length = strlen($key);

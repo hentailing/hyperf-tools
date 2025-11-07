@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Madoka\Cache\Integer;
 
-use Generator;
 use GlobIterator;
 use Hyperf\Cache\Exception\CacheException;
 use Hyperf\Support\Filesystem\Filesystem;
@@ -22,6 +21,8 @@ class FileSystemDriver extends Driver
      * @var Filesystem
      */
     private Filesystem $filesystem;
+
+    private string $suffix = '.integer';
 
     public function __construct(ContainerInterface $container, array $config)
     {
@@ -43,16 +44,16 @@ class FileSystemDriver extends Driver
     {
         $file = $this->getCacheKey($key);
         $integer = 0;
-        $ttl = 0;
+        $seconds = 0;
         if(is_file($file)){
             $reader = new FileIntegerReader($file);
             if(!$reader->isExpired()){
-                $ttl = $reader->getExpiredTime();
+                $seconds = $reader->getExpiredTime();
                 $integer = $reader->getContent();
             }
         }
         $integer += $step;
-        $this->putContent($file, $integer, $ttl);
+        $this->filesystem->put($file, FileIntegerReader::pack($seconds, $integer));
         return $integer;
     }
 
@@ -136,11 +137,11 @@ class FileSystemDriver extends Driver
     /**
      * @inheritDoc
      */
-    public function getMultiplePrefix(string $prefix): Generator
+    public function getMultiplePrefix(string $prefix): iterable
     {
-        $cacheKey = sprintf('%s%s%s', $this->getPrefix(), $prefix, PrefixCacheInterface::SEPARATOR);
-        $prefixLength = strlen(sprintf('%s%s%s', $this->prefix, $prefix, PrefixCacheInterface::SEPARATOR));
-        $iterator = new GlobIterator($cacheKey . '*.cache');
+        $cacheKey = $this->getPrefix() . $prefix . PrefixCacheInterface::SEPARATOR;
+        $prefixLength = strlen($this->prefix . $prefix . PrefixCacheInterface::SEPARATOR);
+        $iterator = new GlobIterator($cacheKey . '*' . $this->suffix);
         foreach ($iterator as $file) {
             $reader = new FileIntegerReader($file);
             if (!$reader->isExpired()) {
@@ -173,7 +174,7 @@ class FileSystemDriver extends Driver
      */
     public function getCacheKey(string $key): string
     {
-        return $this->getPrefix() . $key . '.integer';
+        return $this->getPrefix() . $key . $this->suffix;
     }
 
     /**

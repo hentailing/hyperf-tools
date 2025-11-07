@@ -9,7 +9,6 @@ use Hyperf\Cache\Exception\CacheException;
 use Hyperf\Support\Filesystem\Filesystem;
 use Madoka\Cache\PrefixCacheInterface;
 use Psr\Container\ContainerInterface;
-use Generator;
 use GlobIterator;
 
 class FileSystemDriver extends Driver implements DriverInterface
@@ -180,7 +179,7 @@ class FileSystemDriver extends Driver implements DriverInterface
     /**
      * @inheritDoc
      */
-    public function getPrefixKeys(string $prefix): Generator
+    public function getPrefixKeys(string $prefix): iterable
     {
         $cacheKey = sprintf('%s%s%s', $this->getPrefix(), $prefix, PrefixCacheInterface::SEPARATOR);
         $prefixLength = strlen(sprintf('%s%s%s', $this->prefix, $prefix, PrefixCacheInterface::SEPARATOR));
@@ -196,7 +195,7 @@ class FileSystemDriver extends Driver implements DriverInterface
     /**
      * @inheritDoc
      */
-    public function getMultiplePrefix(string $prefix): Generator
+    public function getMultiplePrefix(string $prefix): iterable
     {
         $cacheKey = sprintf('%s%s%s', $this->getPrefix(), $prefix, PrefixCacheInterface::SEPARATOR);
         $prefixLength = strlen(sprintf('%s%s%s', $this->prefix, $prefix, PrefixCacheInterface::SEPARATOR));

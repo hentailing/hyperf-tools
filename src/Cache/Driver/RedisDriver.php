@@ -6,17 +6,14 @@ namespace Madoka\Cache\Driver;
 
 use Hyperf\Cache\Driver\RedisDriver as BaseRedisDriver;
 use Madoka\Cache\PrefixCacheInterface;
-use Generator;
 
 class RedisDriver extends BaseRedisDriver implements DriverInterface
 {
 
     /**
-     * 获取前缀Key
-     * @param string $prefix
-     * @return Generator
+     * @inheritDoc
      */
-    public function getPrefixKeys(string $prefix): Generator
+    public function getPrefixKeys(string $prefix): iterable
     {
         $cacheKey = sprintf('%s%s', $this->getCacheKey($prefix), PrefixCacheInterface::SEPARATOR);
         $match = sprintf('%s*', $cacheKey);
@@ -32,7 +29,7 @@ class RedisDriver extends BaseRedisDriver implements DriverInterface
     /**
      * @inheritDoc
      */
-    public function getMultiplePrefix(string $prefix): Generator
+    public function getMultiplePrefix(string $prefix): iterable
     {
         $cacheKey = sprintf('%s%s', $this->getCacheKey($prefix), PrefixCacheInterface::SEPARATOR);
         $match = sprintf('%s*', $cacheKey);

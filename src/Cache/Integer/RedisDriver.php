@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Madoka\Cache\Integer;
 
-use Generator;
 use Hyperf\Redis\RedisFactory;
 use Madoka\Cache\PrefixCacheInterface;
 use Psr\Container\ContainerInterface;
@@ -90,7 +89,7 @@ class RedisDriver extends Driver
     /**
      * @inheritDoc
      */
-    public function getMultiplePrefix(string $prefix): Generator
+    public function getMultiplePrefix(string $prefix): iterable
     {
         $cacheKey = sprintf('%s%s', $this->getCacheKey($prefix), PrefixCacheInterface::SEPARATOR);
         $match = sprintf('%s*', $cacheKey);

@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 namespace Madoka\Cache;
-use Generator;
 
 interface PrefixCacheInterface
 {
@@ -20,7 +19,7 @@ interface PrefixCacheInterface
     /**
      * Fetches prefix value from the cache.
      * @param string $prefix
-     * @return Generator
+     * @return iterable<string, mixed>
      */
-    public function getMultiplePrefix(string $prefix): Generator;
+    public function getMultiplePrefix(string $prefix): iterable;
 }

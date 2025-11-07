@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Madoka\Cache\Integer;
 
-use Generator;
 use Hyperf\Cache\Exception\CacheException;
 use Hyperf\Memory\TableManager;
 use Madoka\Cache\PrefixCacheInterface;
@@ -95,7 +94,7 @@ class SwooleTableDriver extends Driver
     /**
      * @inheritDoc
      */
-    public function getMultiplePrefix(string $prefix): Generator
+    public function getMultiplePrefix(string $prefix): iterable
     {
         $cacheKey = $this->getCacheKey($prefix) . PrefixCacheInterface::SEPARATOR;
         $prefixLength = strlen($cacheKey);

@@ -13,9 +13,9 @@ interface DriverInterface extends HyperfDriverInterface, PrefixCacheInterface
     /**
      * 获取前缀Key
      * @param string $prefix
-     * @return Generator
+     * @return iterable<string>
      */
-    public function getPrefixKeys(string $prefix): Generator;
+    public function getPrefixKeys(string $prefix): iterable;
 
     /**
      * 获取前缀的计数

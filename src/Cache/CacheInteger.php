@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Madoka\Cache;
 
-use Generator;
 use Madoka\Cache\Integer\IntegerInterface;
 
 /**
@@ -79,8 +78,8 @@ class CacheInteger implements IntegerInterface
     /**
      * @inheritDoc
      */
-    public function getMultiplePrefix(string $prefix): Generator
+    public function getMultiplePrefix(string $prefix): iterable
     {
-        yield from $this->driver->getMultiplePrefix($this->name($prefix));
+        yield from $this->driver->getMultiplePrefix(empty($prefix) ? $this->join() : $this->name($prefix));
     }
 }

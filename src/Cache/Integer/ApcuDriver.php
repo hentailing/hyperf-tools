@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Madoka\Cache\Integer;
 
 use APCUIterator;
-use Generator;
 use Madoka\Cache\PrefixCacheInterface;
 
 class ApcuDriver extends Driver
@@ -75,7 +74,7 @@ class ApcuDriver extends Driver
     /**
      * @inheritDoc
      */
-    public function getMultiplePrefix(string $prefix): Generator
+    public function getMultiplePrefix(string $prefix): iterable
     {
         $key = $this->getCacheKey($prefix . PrefixCacheInterface::SEPARATOR);
         $length = strlen($key);
