@@ -13,7 +13,9 @@ return [
     'integer' => [
         'default' => [
             'driver'     => Madoka\Cache\Integer\RedisDriver::class,
-            'pool_class' => Hyperf\Redis\Redis::class,
+            'options'    => [
+                'pool' => 'default',
+            ],
         ],
     ],
     // table配置

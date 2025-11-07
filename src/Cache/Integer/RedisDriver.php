@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Madoka\Cache\Integer;
 
 use Generator;
+use Hyperf\Redis\RedisFactory;
 use Madoka\Cache\PrefixCacheInterface;
 use Psr\Container\ContainerInterface;
 use Hyperf\Redis\Redis;
@@ -19,11 +20,8 @@ class RedisDriver extends Driver
     public function __construct(ContainerInterface $container, array $config)
     {
         parent::__construct($container, $config);
-        if(isset($config['pool_class'])){
-            $this->redis = $container->get($config['pool_class']);
-        }else{
-            $this->redis = $container->get(Redis::class);
-        }
+
+        $this->redis = $container->get(RedisFactory::class)->get($config['options']['pool'] ?? 'default');
     }
 
     /**

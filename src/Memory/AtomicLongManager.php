@@ -17,7 +17,7 @@ class AtomicLongManager
     private static array $container = [];
 
     /**
-     * You should initialize a Atomic Long with the identifier before use it.
+     * You should initialize an Atomic Long with the identifier before use it.
      * @param string $identifier
      * @param int $value
      */
@@ -27,7 +27,15 @@ class AtomicLongManager
     }
 
     /**
-     * Get a initialized Atomic Long from container by the identifier.
+     * determine if the initialized Atomic Long is existed in container by the identifier
+     */
+    public static function has(string $identifier): bool
+    {
+        return isset(static::$container[$identifier]);
+    }
+
+    /**
+     * Get an initialized Atomic Long from container by the identifier.
      *
      * @param string $identifier
      * @return Long
