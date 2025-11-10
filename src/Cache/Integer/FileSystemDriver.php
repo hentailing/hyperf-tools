@@ -22,7 +22,7 @@ class FileSystemDriver extends Driver
      */
     private Filesystem $filesystem;
 
-    private string $suffix = '.integer';
+    private string $suffix;
 
     public function __construct(ContainerInterface $container, array $config)
     {
@@ -33,6 +33,7 @@ class FileSystemDriver extends Driver
                 throw new CacheException('Has no permission to create integer directory!');
             }
         }
+        $this->suffix = $config['suffix'] ?? '.integer';
         $this->filesystem = $container->get(Filesystem::class);
     }
 

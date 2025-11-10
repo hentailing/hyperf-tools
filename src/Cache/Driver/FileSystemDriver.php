@@ -24,6 +24,8 @@ class FileSystemDriver extends Driver implements DriverInterface
      */
     private Filesystem $filesystem;
 
+    private string $suffix;
+
     public function __construct(ContainerInterface $container, array $config)
     {
         parent::__construct($container, $config);
@@ -33,6 +35,7 @@ class FileSystemDriver extends Driver implements DriverInterface
                 throw new CacheException('Has no permission to create cache directory!');
             }
         }
+        $this->suffix = $config['suffix'] ?? '.cache';
         $this->filesystem = $container->get(Filesystem::class);
     }
 
@@ -165,7 +168,7 @@ class FileSystemDriver extends Driver implements DriverInterface
      */
     public function clearPrefix(string $prefix): bool
     {
-        $globIterator = new GlobIterator($this->getPrefix() . $prefix . '*.cache');
+        $globIterator = new GlobIterator($this->getPrefix() . $prefix . '*' . $this->suffix);
         foreach ($globIterator as $splFileInfo) {
             if ($splFileInfo->isDir()) {
                 continue;
@@ -183,7 +186,7 @@ class FileSystemDriver extends Driver implements DriverInterface
     {
         $cacheKey = sprintf('%s%s%s', $this->getPrefix(), $prefix, PrefixCacheInterface::SEPARATOR);
         $prefixLength = strlen(sprintf('%s%s%s', $this->prefix, $prefix, PrefixCacheInterface::SEPARATOR));
-        $iterator = new GlobIterator($cacheKey . '*.cache');
+        $iterator = new GlobIterator($cacheKey . '*' . $this->suffix);
         foreach ($iterator as $file) {
             $reader = new FileCacheExpireReader($file);
             if (!$reader->isExpired()) {
@@ -199,7 +202,7 @@ class FileSystemDriver extends Driver implements DriverInterface
     {
         $cacheKey = sprintf('%s%s%s', $this->getPrefix(), $prefix, PrefixCacheInterface::SEPARATOR);
         $prefixLength = strlen(sprintf('%s%s%s', $this->prefix, $prefix, PrefixCacheInterface::SEPARATOR));
-        $iterator = new GlobIterator($cacheKey . '*.cache');
+        $iterator = new GlobIterator($cacheKey . '*' . $this->suffix);
         foreach ($iterator as $file) {
             $reader = new FileCacheReader($file);
             if (!$reader->isExpired()) {
@@ -215,7 +218,7 @@ class FileSystemDriver extends Driver implements DriverInterface
     {
         $count = 0;
         $cacheKey = sprintf('%s%s%s', $this->getPrefix(), $prefix, PrefixCacheInterface::SEPARATOR);
-        $iterator = new GlobIterator($cacheKey . '*.cache');
+        $iterator = new GlobIterator($cacheKey . '*' . $this->suffix);
         foreach ($iterator as $file) {
             $reader = new FileCacheExpireReader($file);
             if (!$reader->isExpired()) {
@@ -227,7 +230,7 @@ class FileSystemDriver extends Driver implements DriverInterface
 
     public function getCacheKey(string $key): string
     {
-        return $this->getPrefix() . $key . '.cache';
+        return $this->getPrefix() . $key . $this->suffix;
     }
 
     protected function getPrefix(): string

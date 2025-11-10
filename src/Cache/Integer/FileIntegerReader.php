@@ -34,7 +34,7 @@ class FileIntegerReader
             $content = file_get_contents($file);
         }
         if (!empty($content)) {
-            list($this->expired, $this->content) = unpack('P2', $content);
+            list(, $this->expired, $this->content) = unpack('P2', $content);
         }
     }
 
