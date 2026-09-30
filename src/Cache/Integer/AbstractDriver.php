@@ -6,7 +6,7 @@ namespace Madoka\Cache\Integer;
 
 use Psr\Container\ContainerInterface;
 
-abstract class Driver implements IntegerInterface
+abstract class AbstractDriver implements IntegerInterface
 {
     /**
      * @var ContainerInterface

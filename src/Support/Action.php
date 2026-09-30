@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Madoka\Units;
+namespace Madoka\Support;
 
 class Action
 {

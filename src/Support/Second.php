@@ -1,12 +1,12 @@
 <?php
 declare(strict_types=1);
 
-namespace Madoka\Constants;
+namespace Madoka\Support;
 
 /**
  * 时间秒数常量
  * Class Second
- * @package Madoka\Constants
+ * @package Madoka\Support
  */
 class Second
 {

@@ -1,6 +1,6 @@
 <?php
 
-namespace Madoka\Event;
+namespace Madoka\Bootstrap;
 
 use Hyperf\Contract\ConfigInterface;
 use Hyperf\Memory\TableManager;
@@ -10,7 +10,7 @@ use Psr\Container\ContainerInterface;
 /**
  * 服务启动前加载
  * Class BeforeStartCallback
- * @package Madoka\Event
+ * @package Madoka\Bootstrap
  */
 class BeforeStartCallback extends ServerStartCallback
 {

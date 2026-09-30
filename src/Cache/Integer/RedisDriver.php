@@ -9,7 +9,7 @@ use Madoka\Cache\PrefixCacheInterface;
 use Psr\Container\ContainerInterface;
 use Hyperf\Redis\Redis;
 
-class RedisDriver extends Driver
+class RedisDriver extends AbstractDriver
 {
     /**
      * @var Redis

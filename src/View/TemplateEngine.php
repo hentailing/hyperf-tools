@@ -7,14 +7,14 @@ use Hyperf\View\Engine\EngineInterface;
 
 /**
  * 自定义视图驱动
- * Class DummyTemplateEngine
- * @package Madoka\Cipher\View
+ * Class TemplateEngine
+ * @package Madoka\View
  */
-class DummyTemplateEngine implements EngineInterface
+class TemplateEngine implements EngineInterface
 {
     public function render(string $template, array $data, array $config): string
     {
-        $engine = new DummyTemplate($config);
+        $engine = new Template($config);
         return $engine->render($template, $data);
     }
 }

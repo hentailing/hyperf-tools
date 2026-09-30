@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Madoka\Units;
+namespace Madoka\Pool;
 
 use Hyperf\Pool\Connection;
 
 /**
  * 虚拟连接池的连接 用于并行数量限制
  * Class DummyConnection
- * @package App\Common
+ * @package Madoka\Pool
  */
 class DummyConnection extends Connection
 {

@@ -3,14 +3,12 @@ declare(strict_types=1);
 
 namespace Madoka\View;
 
-use Madoka\Exception\TemplateException;
-
 /**
  * 自定义视图处理
- * Class DummyTemplate
- * @package Madoka\Cipher\View
+ * Class Template
+ * @package Madoka\View
  */
-class DummyTemplate
+class Template
 {
     /**
      * @var array
@@ -21,7 +19,7 @@ class DummyTemplate
     ];
 
     /**
-     * DummyTemplate constructor.
+     * Template constructor.
      * @param array $config
      */
     public function __construct(array $config)

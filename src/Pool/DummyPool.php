@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Madoka\Units;
+namespace Madoka\Pool;
 
 use Hyperf\Contract\ConnectionInterface;
 use Hyperf\Pool\Pool;
@@ -9,7 +9,7 @@ use Hyperf\Pool\Pool;
 /**
  * 虚拟连接池 用于并行数量限制
  * Class DummyPool
- * @package App\Common
+ * @package Madoka\Pool
  */
 class DummyPool extends Pool
 {

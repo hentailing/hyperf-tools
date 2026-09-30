@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Madoka\Units;
+namespace Madoka\Support;
 
 use Hyperf\Contract\Arrayable;
 use ArrayAccess;
@@ -13,7 +13,7 @@ use JsonSerializable;
 /**
  * 简便实体内用于数组对象处理
  * Class Entity
- * @package Madoka\Units
+ * @package Madoka\Support
  */
 class Entity implements IteratorAggregate, JsonSerializable, ArrayAccess, Arrayable
 {

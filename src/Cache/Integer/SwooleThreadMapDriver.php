@@ -10,7 +10,7 @@ use Madoka\Memory\ThreadMapManager;
 use Psr\Container\ContainerInterface;
 use Swoole\Thread\Map;
 
-class SwooleThreadMapDriver extends Driver
+class SwooleThreadMapDriver extends AbstractDriver
 {
     protected Map $map;
 

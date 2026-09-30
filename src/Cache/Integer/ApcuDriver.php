@@ -7,7 +7,7 @@ namespace Madoka\Cache\Integer;
 use APCUIterator;
 use Madoka\Cache\PrefixCacheInterface;
 
-class ApcuDriver extends Driver
+class ApcuDriver extends AbstractDriver
 {
     /**
      * @inheritDoc

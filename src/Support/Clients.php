@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Madoka\Units;
+namespace Madoka\Support;
 
 use Hyperf\Contract\ConfigInterface;
 use Hyperf\Context\ApplicationContext;
@@ -33,7 +33,7 @@ class Clients
     public static function localIp(): string
     {
         $config = ApplicationContext::getContainer()->get(ConfigInterface::class);
-        $local_ip = $config->get('inahime.service_local_id', null);
+        $local_ip = $config->get('inahime.normal.service_local_ip');
         if(!isset($local_ip)){
             $eth = swoole_get_local_ip();
             if(!empty($eth)){

@@ -10,7 +10,7 @@ use Madoka\Cache\PrefixCacheInterface;
 use Psr\Container\ContainerInterface;
 use Swoole\Table;
 
-class SwooleTableDriver extends Driver
+class SwooleTableDriver extends AbstractDriver
 {
     public const COLUMN_NAME = 'value';
 

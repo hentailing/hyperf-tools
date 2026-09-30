@@ -10,7 +10,7 @@ use Hyperf\Support\Filesystem\Filesystem;
 use Madoka\Cache\PrefixCacheInterface;
 use Psr\Container\ContainerInterface;
 
-class FileSystemDriver extends Driver
+class FileSystemDriver extends AbstractDriver
 {
     /**
      * @var string

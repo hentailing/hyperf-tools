@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Madoka\Exception;
+namespace Madoka\View;
 
 use RuntimeException;
 
